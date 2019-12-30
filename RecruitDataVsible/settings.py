@@ -81,7 +81,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'recruit_data',  #zhaopin_test   #recruit_info
         'USER':'root' ,        #os.environ.get('DJANGO_MYSQL_USER')
-        'PASSWORD': 'root',     #os.environ.get('DJANGO_MYSQL_PASSWORD')
+        'PASSWORD': 'wo123456',     #os.environ.get('DJANGO_MYSQL_PASSWORD')
         'HOST': '127.0.0.1',   #os.environ.get('DJANGO_MYSQL_HOST')
         'PORT': 3306,
         'OPTIONS': {'charset': 'utf8mb4'},

@@ -121,6 +121,7 @@ def getEducationAndExperienceOfCity(request):
      return HttpResponse(json.dumps(result), content_type="application/json")
 
 def onlineSpider(request):
+    #在这里爬虫
     kw = request.GET.get("kw", "Java开发")
     try:
           fileName = "\zllog"+str(int(time.time()))+".txt"

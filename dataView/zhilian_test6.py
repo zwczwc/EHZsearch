@@ -393,7 +393,7 @@ def climb(url,pag,headers,post_type):#爬取页面信息
 def main(json_type,file):#json_type为爬取页面传入的爬取数据类型，比如全部，Java开发等等字符串
     global filePath
     filePath = file
-
+    #main
     ualist=get_ualist()
     ua = random.choice(ualist)
     headers = {"Connection":"Keep-alive", "User-Agent":ua}

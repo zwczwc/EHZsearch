@@ -1,0 +1,110 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html style="height: 100%">
+
+<head>
+    <meta charset="utf-8">
+</head>
+
+<body style="height: 100%; margin: 0">
+    <div id="container" style="height: 100%"></div>
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/echarts.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/apiMap.js' %}"></script>
+    <script type="text/javascript">
+        var dom = document.getElementById("container");
+        var myChart = echarts.init(dom);
+        // var app = {};
+        option = null;
+        // var data = [];
+        // var geoCoordMap = {};
+        window.onresize = function () {
+            myChart.resize();
+        }
+        // $.ajax({
+        //     async: false,    //表示请求是否异步处理
+        //     type: "get",    //请求类型
+        //     url: "/job/jobCountsEveryCity",//请求的 URL地址
+        //     dataType: "json",//返回的数据类型
+        //     success: function (datas) {
+        //         data = datas.jobCountOfCity;
+        //         geoCoordMap = datas.lngAndLatOfCity;
+
+
+        //     },
+        //     error: function (data) {
+
+        //     }
+        // });
+
+        // var convertData = function (data) {
+        //     var res = [];
+        //     for (var i = 0; i < data.length; i++) {
+        //         var geoCoord = geoCoordMap[data[i].name];
+        //         if (geoCoord) {
+        //             res.push({
+        //                 name: data[i].name,
+        //                 value: geoCoord.concat(data[i].value)
+        //             });
+        //         }
+        //     }
+        //     return res;
+        // };
+
+        // var convertedData = [
+        //     convertData(data),
+        //     convertData(data.sort(function (a, b) {
+        //         return b.value - a.value;
+        //     }).slice(0, 6))
+        // ];
+        // data.sort(function (a, b) {
+        //     return a.value - b.value;
+        // })
+
+        // var selectedItems = [];
+        // var categoryData = [];
+        // var barData = [];
+        // //   var maxBar = 30;
+        // var sum = 0;
+        // var count = data.length;
+        // for (var i = 0; i < data.length; i++) {
+        //     categoryData.push(data[i].name);
+        //     barData.push(data[i].value);
+        //     sum += data[i].value;
+        // }
+        option = {
+            series: [{
+                type: 'treemap',
+                data: [{
+                    name: '今年12月',            // First tree
+                    value: 1,
+                },{
+                    name: 'pyhon爬虫',            // First tree
+                    value: 10,
+                },{
+                    name: '编辑器',            // Second tree
+                    value: 8,
+                },{
+                    name: '3452',            // First tree
+                    value: 4,
+                },{
+                    name: 'dfgsfs',            // First tree
+                    value: 5,
+                },{
+                    name: '绕太阳',            // First tree
+                    value: 2,
+                }, {
+                    name: '合金化',            // Second tree
+                    value: 7,
+                }]
+            }]
+        };
+        if (option && typeof option === "object") {
+            myChart.setOption(option, true);
+        }
+
+    </script>
+
+</body>
+
+</html>

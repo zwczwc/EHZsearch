@@ -8,10 +8,8 @@
 </head>
 
 <body style="height: 100%; margin: 0;position:relative;">
-
-    <div id="container2" style="height: 100%" class="col-sm-6"></div>
-
     <div id="container" style="height: 100%" class="col-sm-6"></div>
+    <div id="container2" style="height: 100%" class="col-sm-6"></div>
     <div class="form-group" style="position: absolute;top: 0px;left: 50%;">
         <select id="post_type" class="form-control">
             <option value="Java开发">Java开发</option>
@@ -70,7 +68,7 @@
 
         option = {
             title: {
-                text: '学历要求占比',
+                text: '媒体类型',
                 x: 'center'
             },
             tooltip: {
@@ -84,7 +82,6 @@
                 top: 20,
                 bottom: 20,
                 data: []
-                //
                 //        selected: data.selected
             },
             series: [
@@ -103,44 +100,43 @@
                     }
                 }
             ]
+
         };
 
+
         option2 = {
-            title: {
-                text: '工作经验要求占比',
-                x: 'center'
-            },
             tooltip: {
-                trigger: 'item',
-                formatter: "{a} <br/>{b} : {c} ({d}%)"
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'shadow'
+                }
             },
             legend: {
-                type: 'scroll',
-                orient: 'vertical',
-                right: 10,
-                top: 20,
-                bottom: 20,
                 data: []
-                //
-                //        selected: data.selected
+            },
+            grid: {
+                left: '3%',
+                // right: '4%',
+                // bottom: '3%',
+                containLabel: true
+            },
+            xAxis: {
+                type: 'value',
+                boundaryGap: [0, 0.01]
+            },
+            yAxis: {
+                type: 'category',
+                data: []
             },
             series: [
                 {
-                    name: '工作经验',
-                    type: 'pie',
-                    radius: '55%',
-                    center: ['40%', '50%'],
+                    type: 'bar',
                     data: [],
-                    itemStyle: {
-                        emphasis: {
-                            shadowBlur: 10,
-                            shadowOffsetX: 0,
-                            shadowColor: 'rgba(0, 0, 0, 0.5)'
-                        }
-                    }
-                }
+                    barWidth : 30,//柱图宽度
+                },
             ]
         };
+
         genData();
         function genData() {
             myChart.showLoading();
@@ -158,8 +154,10 @@
                     option.legend.data = datas.legendData;
                     option.series[0].data = datas.seriesData;
 
-                    option2.legend.data = datas.legendData2;
-                    option2.series[0].data = datas.seriesData2;
+
+                    option2.legend.data = datas.legendData;
+                    option2.series[0].data = datas.seriesData;
+                    option2.yAxis.data = datas.legendData;
 
                     if (option && typeof option === "object") {
                         myChart.setOption(option, true);

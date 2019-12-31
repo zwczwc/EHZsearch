@@ -29,46 +29,15 @@
 
                         <div class="ibox-content m-b-sm border-bottom">
                             <div class="input-group input-group-sm" style="position: relative;">
-                                <span class="input-group-addon">要爬取的职位类型</span>
-                                <select type="text" class="form-control" id="kw">
-                                   <option value="Java开发">Java开发</option>
-                                   <option value="UI设计师">UI设计师</option>
-                                   <option value="Web前端">Web前端</option>
-                                   <option value="PHP">PHP</option>
-                                   <option value="Python">Python</option>
-                                   <option value="Android">Android</option>
-                                   <option value="美工">美工</option>
-                                   <option value="深度学习">深度学习</option>
-                                   <option value="算法工程师">算法工程师</option>
-                                   <option value="Hadoop">Hadoop</option>
-                                   <option value="Node.js">Node.js</option>
-                                   <option value="数据开发">数据开发</option>
-                                   <option value="数据分析师">数据分析师</option>
-                                   <option value="数据架构">数据架构</option>
+                                <span class="input-group-addon">要爬取的关键字</span>
 
-                                   <option value="人工智能">人工智能</option>
-                                   <option value="区块链">区块链</option>
-                                   <option value="电气工程师">电气工程师</option>
-                                   <option value="电子工程师">电子工程师</option>
-                                   <option value="PLC">PLC</option>
-                                   <option value="测试工程师">测试工程师</option>
-                                   <option value="设备工程师">设备工程师</option>
-                                   <option value="硬件工程师">硬件工程师</option>
-                                   <option value="结构工程师">结构工程师</option>
-                                   <option value="工艺工程师">工艺工程师</option>
-                                   <option value="产品经理">产品经理</option>
-                                   <option value="新媒体运营">新媒体运营</option>
-                                   <option value="运营专员">运营专员</option>
-                                   <option value="淘宝运营">淘宝运营</option>
-
-                                   <option value="天猫运营">天猫运营</option>
-                                   <option value="产品助理">产品助理</option>
-                                   <option value="产品运营">产品运营</option>
-                                   <option value="淘宝客服">淘宝客服</option>
-                                   <option value="游戏运营">游戏运营</option>
-                                   <option value="编辑">编辑</option>
-                                   <option value="全部">全部</option>
-                                </select>
+<!--                                换搜索框 要爬取到百度的关键字-->
+                                <input type="text" placeholder="请输入您需搜索要的内容 …" class="form-control" id="kw"/>
+                               <!-- <select type="text" class="form-control" id="kw"> -->
+                                  <!-- <option value="Java开发">Java开发</option>
+                                  <option value="UI设计师">UI设计师</option>
+                                  <option value="Web前端">Web前端</option> -->
+                               <!-- </select> -->
                                 <button type="button" class="form-control" id="startSpide">开始</button>
                                 <button type="button" class="form-control" id="downLoad" style="width:100px;height:50px;position: absolute;top:91px;right:27px;display: none;">下载</button>
                             </div>
@@ -112,6 +81,7 @@
     <script>
 
             $("#startSpide").click(function(event){
+                console.log("开始爬取", $("#kw").val() )  
                 $("#myModal2").modal({
                     backdrop: "static", // 相当于data-backdrop
                     keyboard: false, // 相当于data-keyboard

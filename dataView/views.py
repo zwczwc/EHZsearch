@@ -122,11 +122,17 @@ def getEducationAndExperienceOfCity(request):
      return HttpResponse(json.dumps(result), content_type="application/json")
 
 def baiduNewsSpider(request):
-    #kw = request.GET.get("kw", "华制智能")
-    #pn = request.GET.get("pn", "0")
-    kw = "华制智能"
-    pn = 0
-    print(baidu_search(kw, pn))
+    kw = request.GET.get("kw")
+    pn = request.GET.get("pn")
+    # kw = "华制智能"
+    # pn = 1
+    # data = {
+    #     'name': 'Vitor',
+    #     'location': 'Finland',
+    #     'is_active': True,
+    #     'count': 28
+    # }
+    # return HttpResponse(json.dumps(data), content_type="application/json")
     return HttpResponse(json.dumps(baidu_search(kw,pn)), content_type="application/json")
     # print(baidu_search(kw, pn))
 

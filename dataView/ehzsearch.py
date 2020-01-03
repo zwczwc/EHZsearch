@@ -27,7 +27,8 @@ def baidu_search(wd, pn):
     # 构建列表头
     #csv_writer.writerow(["标题", "链接", "来源", "时间", "摘要"])
     res = []
-
+    pn = 1
+    print('wd:'+wd+'pn:'+str(pn))
     for i in range(0, (pn - 1) * 10 + 1, 10):
         # 拼接url
         # url = 'https://www.baidu.com/baidu?wd='+wd+'&tn=monline_dg&ie=utf-8&pn='+str(i)
@@ -61,7 +62,7 @@ def baidu_search(wd, pn):
             # print(title,link,source,time,abstract)
             #csv_writer.writerow([title, link, source, time, abstract])
 
-    print('123421342524352345')
+    print('endend')
     return res
     # 关闭文件
     #f.close()

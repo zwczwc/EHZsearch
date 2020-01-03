@@ -61,7 +61,7 @@ def baidu_search(wd, pn):
             # print(title,link,source,time,abstract)
             #csv_writer.writerow([title, link, source, time, abstract])
 
-    print(res)
+    print('123421342524352345')
     return res
     # 关闭文件
     #f.close()

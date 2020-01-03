@@ -31,6 +31,7 @@ urlpatterns = [
     path('job/jobTypeCountOfCity', views.getJobTypeCountByCity),
     path('job/getEducationAndExperienceOfCity', views.getEducationAndExperienceOfCity),
     path('job/onlineSpider', views.onlineSpider),
+    path('job/onlineSpider2', views.baiduNewsSpider),
     path('job/companyInfo', views.companyInfo),
 ]
 

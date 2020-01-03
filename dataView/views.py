@@ -15,6 +15,7 @@ from django.db.models import Q
 from django.db.models import F
 from django.db.models import Count
 from .zhilian_test6 import main
+from .ehzsearch import baidu_search
 import operator
 from dwebsocket.decorators import accept_websocket,require_websocket
 
@@ -119,6 +120,14 @@ def getEducationAndExperienceOfCity(request):
      result["seriesData2"] = jobExperienceDemands
      result["legendData2"] = jobExperienceName
      return HttpResponse(json.dumps(result), content_type="application/json")
+
+def baiduNewsSpider(request):
+    #kw = request.GET.get("kw", "华制智能")
+    #pn = request.GET.get("pn", "0")
+    kw = "华制智能"
+    pn = 0
+    return HttpResponse(json.dumps(baidu_search(kw,pn)), content_type="application/json")
+
 
 def onlineSpider(request):
     #在这里爬虫

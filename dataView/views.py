@@ -126,8 +126,9 @@ def baiduNewsSpider(request):
     #pn = request.GET.get("pn", "0")
     kw = "华制智能"
     pn = 0
+    print(baidu_search(kw, pn))
     return HttpResponse(json.dumps(baidu_search(kw,pn)), content_type="application/json")
-
+    # print(baidu_search(kw, pn))
 
 def onlineSpider(request):
     #在这里爬虫

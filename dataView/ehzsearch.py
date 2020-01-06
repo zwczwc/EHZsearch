@@ -1,6 +1,8 @@
 import requests  # 导入requests包
 from bs4 import BeautifulSoup
 import csv
+import datetime
+import os
 
 headersParameters = {  # 发送HTTP请求时的HEAD信息，用于伪装为浏览器
     'Connection': 'Keep-Alive',
@@ -26,10 +28,17 @@ def baidu_search(wd, pn):
 
     # 构建列表头
     #csv_writer.writerow(["标题", "链接", "来源", "时间", "摘要"])
-    res = []
+    #res = []
+    root_path = 'C:\\logs\\'
+    if not os.path.exists(root_path):
+        os.makedirs(root_path)
+    fileName = str(datetime.datetime.now().strftime('%Y-%m-%d %H-%M-%S')) + '.txt'
+    full_path = root_path + fileName
+    f = open(full_path,'w',encoding='utf8')
+    res = {'filepath': full_path, 'data': []}
     pn = 1
     print('wd:'+wd+'pn:'+str(pn))
-    for i in range(0, (pn - 1) * 10 + 1, 10):
+    for i in range(0, (int(pn) - 1) * 10 + 1, 10):
         # 拼接url
         # url = 'https://www.baidu.com/baidu?wd='+wd+'&tn=monline_dg&ie=utf-8&pn='+str(i)
         url = 'https://www.baidu.com/s?rtt=1&bsst=1&cl=2&wd=' + wd + '&tn=news&ie=utf-8&pn=' + str(i)
@@ -57,15 +66,23 @@ def baidu_search(wd, pn):
             res_item['source'] = source
             res_item['time'] = time
             res_item['abstract'] = abstract
-            res.append(res_item)
+            res['data'].append(res_item)
+
+            f.write('-------------------\n')
+            f.write('标题：'+ title +'\n')
+            f.write('链接：' + link + '\n')
+            f.write('来源：' + source + '\n')
+            f.write('日期：' + time + '\n')
+            f.write('摘要：' + abstract + '\n')
+            f.write('-------------------\n')
             # abstract = list(summary)[1]
             # print(title,link,source,time,abstract)
             #csv_writer.writerow([title, link, source, time, abstract])
 
     print('endend')
-    return res
     # 关闭文件
-    #f.close()
+    f.close()
+    return res
     # print(soup.prettify())
 
 

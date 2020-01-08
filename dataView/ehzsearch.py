@@ -3,8 +3,8 @@ from bs4 import BeautifulSoup
 import csv
 import datetime
 import os
-
-headersParameters = {  # 发送HTTP请求时的HEAD信息，用于伪装为浏览器
+#发送HTTP请求时的HEAD信息，用于伪装为浏览器
+headersParameters = {
     'Connection': 'Keep-Alive',
     'Accept': 'text/html, application/xhtml+xml, */*',
     'Accept-Language': 'en-US,en;q=0.8,zh-Hans-CN;q=0.5,zh-Hans;q=0.3',
@@ -29,6 +29,7 @@ def baidu_search(wd, pn):
     # 构建列表头
     #csv_writer.writerow(["标题", "链接", "来源", "时间", "摘要"])
     #res = []
+    #日志文件路径创建
     root_path = 'C:\\logs\\'
     if not os.path.exists(root_path):
         os.makedirs(root_path)
@@ -36,8 +37,13 @@ def baidu_search(wd, pn):
     full_path = root_path + fileName
     f = open(full_path,'w',encoding='utf8')
     res = {'filepath': full_path, 'data': []}
-    pn = 1
+    #假数据
+    # wd = '华制智能'
+    # pn = 1
     print('wd:'+wd+'pn:'+str(pn))
+    pre_link = 'test'
+    cnt = 0
+    # for i in range(0, (int(pn) - 1) * 10 + 1, 10):
     for i in range(0, (int(pn) - 1) * 10 + 1, 10):
         # 拼接url
         # url = 'https://www.baidu.com/baidu?wd='+wd+'&tn=monline_dg&ie=utf-8&pn='+str(i)
@@ -45,21 +51,34 @@ def baidu_search(wd, pn):
         # Get方式获取网页数据
         strhtml = requests.get(url, headers=headersParameters)
         strhtml.encoding = "utf-8"
-
         # 解析
         soup = BeautifulSoup(strhtml.text, 'lxml')
         data = soup.select('.result')
 
+        # 重复判断
+        flag_1 = True
+
         for item in data:
             title = item.find('a').get_text().strip()
             link = item.find('a').get('href').strip()
+            if (link == pre_link):
+                break
+            if(flag_1):
+                pre_link = link
+                flag_1 = False
             # 重定向
             # link_res = Redirect(link)
-            author = item.find('p', class_='c-author').get_text().replace("\n", "").replace(" ", "")
-            # print(author)
-            source = author[:-22]
-            time = author[-20:]
-            abstract = item.find('div', class_='c-summary').get_text().strip().replace("\n", "").split()[3]
+            # author切片
+            list_author = item.find('p', class_='c-author').get_text().strip().replace("\n", "").split('\xa0\xa0')
+            source = list_author[0]
+            time = list_author[1].lstrip()
+            list_abstract = item.find('div', class_='c-summary').get_text().strip().replace("\n", "").replace('\xa0','').replace('\t','').split()
+            #x小时前格式还是标准日期格式的判断
+            if(list_abstract[2][2] == ':'):
+                abstract = list_abstract[3]
+            else:
+                abstract = list_abstract[2]
+
             res_item = {}
             res_item['title'] = title
             res_item['link'] = link
@@ -84,11 +103,3 @@ def baidu_search(wd, pn):
     f.close()
     return res
     # print(soup.prettify())
-
-
-if __name__ == '__main__':
-    # 关键字
-    wd = "华制智能"
-    # 需要多少页的结果
-    pn = 1
-    baidu_search(wd, pn)

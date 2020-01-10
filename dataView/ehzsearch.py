@@ -39,7 +39,7 @@ def baidu_search(wd, pn):
     res = {'filepath': full_path, 'data': []}
     #假数据
     # wd = '华制智能'
-    # pn = 1
+    pn = 1
     print('wd:'+wd+'pn:'+str(pn))
     pre_link = 'test'
     cnt = 0

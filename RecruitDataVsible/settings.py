@@ -79,7 +79,7 @@ WSGI_APPLICATION = 'RecruitDataVsible.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'news_info',  #zhaopin_test   #recruit_info
+        'NAME': 'ehzsearch_data',  #zhaopin_test   #recruit_info
         'USER':'root' ,        #os.environ.get('DJANGO_MYSQL_USER')
         'PASSWORD': 'wo123456',     #os.environ.get('DJANGO_MYSQL_PASSWORD')
         'HOST': '127.0.0.1',   #os.environ.get('DJANGO_MYSQL_HOST')

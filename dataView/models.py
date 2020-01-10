@@ -7,35 +7,10 @@
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
 
+class news_info(models.Model):
+    title = models.CharField(max_length=255)
+    link = models.CharField(max_length=255)
+    source = models.CharField(max_length=255)
+    time = models.CharField(max_length=255)
+    abstract = models.CharField(max_length=255)
 
-class Company(models.Model):
-    number = models.CharField(primary_key=True, max_length=255)
-    company = models.CharField(max_length=255)
-    logo = models.CharField(max_length=255, blank=True, null=True)
-    website = models.CharField(max_length=255)
-    industry = models.CharField(max_length=255)
-    scale = models.CharField(max_length=255)
-
-    class Meta:
-        managed = True
-        db_table = 'company'
-
-
-class Job(models.Model):
-    number = models.ForeignKey(Company, models.DO_NOTHING, db_column='number')
-    job = models.CharField(max_length=255)
-    post_type = models.CharField(max_length=255)
-    city = models.CharField(max_length=255)
-    job_place = models.CharField(max_length=255)
-    job_experience = models.CharField(max_length=255)
-    education = models.CharField(max_length=255)
-    min_wage = models.FloatField()
-    max_wage = models.FloatField()
-    job_duty = models.CharField(max_length=255)
-    job_benefits = models.CharField(max_length=255)
-    update_time = models.CharField(max_length=255)
-
-    class Meta:
-        managed = True
-        db_table = 'job'
-        ordering = ['id']

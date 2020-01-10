@@ -20,7 +20,7 @@
 
 </head>
 
-
+<!-- 新加文件 -->
 <body class="gray-bg">
     <div class="row">
         <div class="wrapper wrapper-content animated fadeInRight">
@@ -82,7 +82,7 @@
     <script>
 
             $("#startSpide").click(function(event){
-                console.log("开始爬取", $("#kw").val() )  
+                console.log("开始爬取", $("#kw").val() )
                 $("#myModal2").modal({
                     backdrop: "static", // 相当于data-backdrop
                     keyboard: false, // 相当于data-keyboard
@@ -95,6 +95,7 @@
                     dataType : "json",//返回的数据类型
                     data:{"kw":$("#kw").val()},
                     success: function (datas){
+                        console.log(datas)
                         if(datas.msg=="success"){
                             document.getElementById("mainIframe").src = "/static"+datas.data;
                             $('#myModal2').modal('hide');
@@ -102,7 +103,7 @@
                         }
                     },
                     error:function (data) {
-
+                        console.log(data)
                     }
                 });
             });

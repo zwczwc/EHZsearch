@@ -6,15 +6,26 @@ from django.core.paginator import Paginator
 import json
 import uuid
 from RecruitDataVsible import settings
-import time
-
+import requests  # 导入requests包
+from bs4 import BeautifulSoup
+import datetime
+import os
 from pandas import Series
 from django.db.models import Q
 from django.db.models import F
 from django.db.models import Count
-from .ehzsearch import baidu_search
+from .models import news_info
 import operator
 from dwebsocket.decorators import accept_websocket,require_websocket
+
+#发送HTTP请求时的HEAD信息，用于伪装为浏览器
+headersParameters = {
+    'Connection': 'Keep-Alive',
+    'Accept': 'text/html, application/xhtml+xml, */*',
+    'Accept-Language': 'en-US,en;q=0.8,zh-Hans-CN;q=0.5,zh-Hans;q=0.3',
+    'Accept-Encoding': 'gzip, deflate',
+    'User-Agent': 'Mozilla/6.1 (Windows NT 6.3; WOW64; Trident/7.0; rv:11.0) like Gecko'
+}
 
 def index(request):
     return render(request, 'index.html')
@@ -29,6 +40,23 @@ def index(request):
 
 def pageConvert(request,pageName="index_i.html"):
     return render(request, pageName,locals())
+def getNewsInfos(request):
+    key_word = {}
+    page = request.GET.get("page", 1)
+    rows = request.GET.get("rows", 10)
+    key_word["title"] = request.GET.get("title", "")
+    key_word["time"] = request.GET.get("time", "")
+    key_word["source"] = request.GET.get("source", "")
+
+    result = getJobsInfoByPageAndRows(page, rows, key_word)
+    return HttpResponse(json.dumps(result), content_type="application/json")
+
+def getNewsInfoByPageAndRows(page,rows,key_word):
+    news = news_info.objects.filter(Q(title__icontains=key_word["title"]) & Q(time__icontains=key_word["time"]) &Q(source__icontains=key_word["source"]))
+    paginator = Paginator(news,rows)
+    query_sets = paginator.page(page)
+    return {"total": paginator.count, "rows": list(query_sets.object_list.values())}
+
 
 def getJobInfos(request):
      key_word = {}
@@ -41,6 +69,9 @@ def getJobInfos(request):
 
      result = getJobsInfoByPageAndRows(page, rows, key_word)
      return  HttpResponse(json.dumps(result), content_type="application/json")
+
+
+
 
 def getAvgSalaryEveryCity(request):
     re = getAvgSalaryByCatetory("城市")
@@ -115,13 +146,97 @@ def getEducationAndExperienceOfCity(request):
      result["legendData2"] = jobExperienceName
      return HttpResponse(json.dumps(result), content_type="application/json")
 
+def Redirect(url):
+    res = requests.get(url, timeout=10)
+    newurl = res.url
+    return newurl
+
+def baidu_search(wd, pn):
+    #日志文件路径创建
+    root_path = 'C:\\logs\\'
+    if not os.path.exists(root_path):
+        os.makedirs(root_path)
+    fileName = str(datetime.datetime.now().strftime('%Y-%m-%d %H-%M-%S')) + '.txt'
+    full_path = root_path + fileName
+    f = open(full_path,'w',encoding='utf8')
+    res = {'filepath': full_path, 'data': []}
+    #假数据
+    # wd = '华制智能'
+    pn = 1
+    print('wd:'+wd+'pn:'+str(pn))
+    pre_link = 'test'
+    cnt = 0
+    # for i in range(0, (int(pn) - 1) * 10 + 1, 10):
+    for i in range(0, (int(pn) - 1) * 10 + 1, 10):
+        # 拼接url
+        # url = 'https://www.baidu.com/baidu?wd='+wd+'&tn=monline_dg&ie=utf-8&pn='+str(i)
+        url = 'https://www.baidu.com/s?rtt=1&bsst=1&cl=2&wd=' + wd + '&tn=news&ie=utf-8&pn=' + str(i)
+        # Get方式获取网页数据
+        strhtml = requests.get(url, headers=headersParameters)
+        strhtml.encoding = "utf-8"
+        # 解析
+        soup = BeautifulSoup(strhtml.text, 'lxml')
+        data = soup.select('.result')
+
+        # 重复判断
+        flag_1 = True
+
+        for item in data:
+            title = item.find('a').get_text().strip()
+            link = item.find('a').get('href').strip()
+            if (link == pre_link):
+                break
+            if(flag_1):
+                pre_link = link
+                flag_1 = False
+            # 重定向
+            # link_res = Redirect(link)
+            # author切片
+            list_author = item.find('p', class_='c-author').get_text().strip().replace("\n", "").split('\xa0\xa0')
+            source = list_author[0]
+            time = list_author[1].lstrip()
+            list_abstract = item.find('div', class_='c-summary').get_text().strip().replace("\n", "").replace('\xa0','').replace('\t','').split()
+            #x小时前格式还是标准日期格式的判断
+            if(list_abstract[2][2] == ':'):
+                abstract = list_abstract[3]
+            else:
+                abstract = list_abstract[2]
+
+            res_item = {}
+
+            res_item['title'] = title
+            res_item['link'] = link
+            res_item['source'] = source
+            res_item['time'] = time
+            res_item['abstract'] = abstract
+            res['data'].append(res_item)
+            #写数据库
+            news_info.objects.create(title=title,link=link,source=source,time=time,abstract=abstract)
+            #写文件
+            f.write('-------------------\n')
+            f.write('标题：'+ title +'\n')
+            f.write('链接：' + link + '\n')
+            f.write('来源：' + source + '\n')
+            f.write('日期：' + time + '\n')
+            f.write('摘要：' + abstract + '\n')
+            f.write('-------------------\n')
+            # abstract = list(summary)[1]
+            # print(title,link,source,time,abstract)
+            #csv_writer.writerow([title, link, source, time, abstract])
+
+    print('endend')
+    # 关闭文件
+    f.close()
+    return res
+    # print(soup.prettify())
+
 def baiduNewsSpider(request):
     kw = request.GET.get("kw")
     pn = request.GET.get("pn")
-    try:
-        return HttpResponse(json.dumps(baidu_search(kw, pn)), content_type="application/json")
-    except Exception:
-          return HttpResponse(json.dumps({"msg": "false"}), content_type="application/json")
+    # try:
+    return HttpResponse(json.dumps(baidu_search(kw, pn)), content_type="application/json")
+    # except Exception:
+    #       return HttpResponse(json.dumps({"msg": "false"}), content_type="application/json")
     # kw = "华制智能"
     # pn = 1
     # data = {

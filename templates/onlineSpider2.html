@@ -30,7 +30,7 @@
 
                         <div class="ibox-content m-b-sm border-bottom">
                             <div class="input-group input-group-sm" style="position: relative;">
-                                <span class="input-group-addon">要爬取的关键字</span>
+                                <span class="input-group-addon">请输入关键字和页数</span>
 
 <!--                                换搜索框 要爬取到百度的关键字-->
                                 <input type="text" placeholder="请输入您需搜索要的内容 …" class="form-control" id="kw"/>
@@ -39,6 +39,7 @@
                                   <option value="UI设计师">UI设计师</option>
                                   <option value="Web前端">Web前端</option> -->
                                <!-- </select> -->
+                                <input type="text" value="76" id="page" class="form-control"/>
                                 <button type="button" class="form-control" id="startSpide">开始</button>
                                 <button type="button" class="form-control" id="downLoad" style="width:100px;height:50px;position: absolute;top:91px;right:27px;display: none;">下载</button>
                             </div>
@@ -81,6 +82,8 @@
     <script src="{% static 'js/content.js' %}"></script>
     <script>
 
+
+
             $("#startSpide").click(function(event){
                 console.log("开始爬取", $("#kw").val() )
                 $("#myModal2").modal({
@@ -93,14 +96,15 @@
                     type : "get",    //请求类型
                     url : "/job/onlineSpider2",//请求的 URL地址
                     dataType : "json",//返回的数据类型
-                    data:{"kw":$("#kw").val()},
+                    data:{"kw":$("#kw").val(), "pn": $("#page").val()},
                     success: function (datas){
                         console.log(datas)
-                        if(datas.msg=="success"){
-                            document.getElementById("mainIframe").src = "/static"+datas.data;
+                        console.log($("#kw").val(), $("#page").val())
+                        // if(datas.msg=="success"){
+                        //     document.getElementById("mainIframe").src = "/static"+datas.data;
                             $('#myModal2').modal('hide');
-                            $("#downLoad").show();
-                        }
+                            // $("#downLoad").show();
+                        // }
                     },
                     error:function (data) {
                         console.log(data)

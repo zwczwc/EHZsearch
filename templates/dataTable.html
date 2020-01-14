@@ -301,7 +301,7 @@
                     dataType : "json",//返回的数据类型
                     data:{"numberId":numberId},
                     success: function (datas){
-                        console.log(datas);
+                        console.log(datas)
                         document.getElementById("companyImg").src = datas[0].logo;
                         document.getElementById("companyName").href = datas[0].website;
                         document.getElementById("companyName").innerHTML  = datas[0].company;

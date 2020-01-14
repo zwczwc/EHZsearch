@@ -48,13 +48,13 @@
                                 <div class="btn-group hidden-xs" id="exampleTableEventsToolbar" role="group">
                                     <form role="form" class="form-inline">
                                         <div class="form-group">
-                                            <label for="city" class="sr-only">标题</label>
-                                            <input type="text" placeholder="标题" id="city"
+                                            <label for="title" class="sr-only">标题</label>
+                                            <input type="text" placeholder="标题" id="title"
                                                    class="form-control">
                                         </div>
                                         <div class="form-group form-group-sm">
-                                            <label for="job_experience" class="sr-only">时间点</label>
-                                            <select id="job_experience" class="form-control">
+                                            <label for="time" class="sr-only">时间点</label>
+                                            <select id="time" class="form-control">
                                                 <option value="">时间点</option>
                                                 <option value="不限">不限</option>
                                                 <option value="无经验">无经验</option>
@@ -66,8 +66,8 @@
                                             </select>
                                         </div>
                                         <div class="form-group form-group-sm">
-                                            <label for="education" class="sr-only">文章类型</label>
-                                            <select type="text" id="education"
+                                            <label for="source" class="sr-only">文章类型</label>
+                                            <select type="text" id="source"
                                                    class="form-control">
                                                 <option value="">来源</option>
                                                 <option value="新浪">新浪</option>
@@ -155,7 +155,6 @@
 	                    title: '标题',
 	                    align:"center",
 	                    halign:"center",
-                        formatter:yongHuBangDing
 	                }, {
 	                    field: 'link',
 	                    title: '链接',
@@ -198,9 +197,6 @@
 			      }
 			    });
 		});
-        function yongHuBangDing(value,row,index){
-				return "<a href='javascript:;' class='btn btn-xs green' onclick=\"checkCompany('" + row.number_id + "')\">"+value+"</a>";
-		}
        function btn_query_click(){
            $('#exampleTableEvents').bootstrapTable('selectPage', 1);
            $('#exampleTableEvents').bootstrapTable('refresh');

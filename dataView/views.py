@@ -48,7 +48,7 @@ def getNewsInfos(request):
     key_word["time"] = request.GET.get("time", "")
     key_word["source"] = request.GET.get("source", "")
 
-    result = getJobsInfoByPageAndRows(page, rows, key_word)
+    result = getNewsInfoByPageAndRows(page, rows, key_word)
     return HttpResponse(json.dumps(result), content_type="application/json")
 
 def getNewsInfoByPageAndRows(page,rows,key_word):

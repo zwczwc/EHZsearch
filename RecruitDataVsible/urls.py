@@ -30,8 +30,9 @@ urlpatterns = [
     path('job/avgWage',views.getAvgSalaryByCityAndJobType),
     path('job/jobTypeCountOfCity', views.getJobTypeCountByCity),
     path('job/getEducationAndExperienceOfCity', views.getEducationAndExperienceOfCity),
-    path('job/onlineSpider2', views.baiduNewsSpider),
+    path('job/onlineSpider', views.baiduNewsSpider),
     path('job/companyInfo', views.companyInfo),
+    path('job/getNewsInfo', views.getNewsInfos),
 ]
 
 if settings.DEBUG:

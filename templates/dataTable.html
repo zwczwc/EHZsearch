@@ -48,79 +48,31 @@
                                 <div class="btn-group hidden-xs" id="exampleTableEventsToolbar" role="group">
                                     <form role="form" class="form-inline">
                                         <div class="form-group">
-                                            <label for="city" class="sr-only">媒体类型</label>
-                                            <input type="text" placeholder="媒体类型" id="city"
+                                            <label for="title" class="sr-only">标题</label>
+                                            <input type="text" placeholder="标题" id="title"
                                                    class="form-control">
                                         </div>
                                         <div class="form-group form-group-sm">
-                                            <label for="job_experience" class="sr-only">时间点</label>
-                                            <select id="job_experience" class="form-control">
-                                                <option value="">时间点</option>
+                                            <label for="time" class="sr-only">时间点</label>
+                                            <select id="time" class="form-control">
+                                                <option value="">时间</option>
+                                                <option value="1年以下">一周</option>
+                                                <option value="1-3年">一个月</option>
+                                                <option value="3-5年">一年</option>
                                                 <option value="不限">不限</option>
-                                                <option value="无经验">无经验</option>
-                                                <option value="1年以下">1年以下</option>
-                                                <option value="1-3年">1-3年</option>
-                                                <option value="3-5年">3-5年</option>
-                                                <option value="5-10年">5-10年</option>
-                                                <option value="10年以上">10年以上</option>
                                             </select>
                                         </div>
                                         <div class="form-group form-group-sm">
-                                            <label for="education" class="sr-only">文章类型</label>
-                                            <select type="text" id="education"
+                                            <label for="source" class="sr-only">文章类型</label>
+                                            <select type="text" id="source"
                                                    class="form-control">
-                                                <option value="">文章类型</option>
-                                                <option value="学历不限">学历不限</option>
-                                                <option value="高中">高中</option>
-                                                <option value="中专">中专</option>
-                                                <option value="大专">大专</option>
-                                                <option value="本科">本科</option>
-                                                <option value="硕士">硕士</option>
-                                                <option value="博士">博士</option>
-                                                <option value="其他">其他</option>
+                                                <option value="">来源</option>
+                                                <option value="新浪">新浪</option>
+                                                <option value="36氪">36氪</option>
                                             </select>
                                         </div>
                                         <div class="form-group form-group-sm">
-                                            <label for="postType" class="sr-only">文章状态</label>
-                                            <select type="text" id="postType" class="form-control">
-                                               <option value="">文章状态</option>
-                                               <option value="Java开发">Java开发</option>
-                                               <option value="UI设计师">UI设计师</option>
-                                               <option value="Web前端">Web前端</option>
-                                               <option value="PHP">PHP</option>
-                                               <option value="Python">Python</option>
-                                               <option value="Android">Android</option>
-                                               <option value="美工">美工</option>
-                                               <option value="深度学习">深度学习</option>
-                                               <option value="算法工程师">算法工程师</option>
-                                               <option value="Hadoop">Hadoop</option>
-                                               <option value="Node.js">Node.js</option>
-                                               <option value="数据开发">数据开发</option>
-                                               <option value="数据分析师">数据分析师</option>
-                                               <option value="数据架构">数据架构</option>
 
-                                               <option value="人工智能">人工智能</option>
-                                               <option value="区块链">区块链</option>
-                                               <option value="电气工程师">电气工程师</option>
-                                               <option value="电子工程师">电子工程师</option>
-                                               <option value="PLC">PLC</option>
-                                               <option value="测试工程师">测试工程师</option>
-                                               <option value="设备工程师">设备工程师</option>
-                                               <option value="硬件工程师">硬件工程师</option>
-                                               <option value="结构工程师">结构工程师</option>
-                                               <option value="工艺工程师">工艺工程师</option>
-                                               <option value="产品经理">产品经理</option>
-                                               <option value="新媒体运营">新媒体运营</option>
-                                               <option value="运营专员">运营专员</option>
-                                               <option value="淘宝运营">淘宝运营</option>
-
-                                               <option value="天猫运营">天猫运营</option>
-                                               <option value="产品助理">产品助理</option>
-                                               <option value="产品运营">产品运营</option>
-                                               <option value="淘宝客服">淘宝客服</option>
-                                               <option value="游戏运营">游戏运营</option>
-                                               <option value="编辑">编辑</option>
-                                            </select>
                                             <button class="btn btn-default" type="button" class="form-control" onclick="btn_query_click()">查询</button>
                                         </div>
                                     </form>
@@ -176,8 +128,7 @@
 
 		$(function(){
 			$('#exampleTableEvents').bootstrapTable({
-			      /* url: "queryDev.json", */
-			      url: "/job/getJobsInfo",
+			      url: "/job/getNewsInfo",
 			      method:"get",
 			      search: false,
 			      cache: false,
@@ -197,66 +148,28 @@
 	                    field: 'state',
 	                    radio: true,
 	                },{
-	                    field: 'job',
-	                    title: '招聘名称',
-//	                    visible: false,
+	                    field: 'title',
+	                    title: '标题',
 	                    align:"center",
 	                    halign:"center",
-                        formatter:yongHuBangDing
 	                }, {
-	                    field: 'post_type',
-	                    title: '岗位类型',
-	                    align:"center",
-	                    halign:"center"
-	                }, {
-	                    field: 'city',
-	                    title: '工作城市',
-	                    align:"center",
-	                    halign:"center"
-	                }, {
-	                    field: 'job_place',
-	                    title: '工作地点',
-	                    align:"center",
-	                    halign:"center"
-	                }, {
-	                    field: 'job_experience',
-	                    title: '工作经验要求',
-	                    align:"center",
-	                    halign:"center"
-	                }, {
-	                    field: 'education',
-	                    title: '学历要求',
+	                    field: 'link',
+	                    title: '链接',
 	                    align:"center",
 	                    halign:"center"
 	                },{
-	                    field: 'min_wage',
-	                    title: '最低薪资',
-	                    align:"center",
-	                    halign:"center",
-                        formatter:function(value,row,index){
-	                        return value+"k";
-                        }
-	                },{
-	                    field: 'max_wage',
-	                    title: '最高薪资',
-	                    align:"center",
-	                    halign:"center",
-                        formatter:function(value,row,index){
-	                        return value+"k";
-                        }
-	                },{
-	                    field: 'job_duty',
-	                    title: '工作职责',
+	                    field: 'source',
+	                    title: '来源',
 	                    align:"center",
 	                    halign:"center"
 	                },{
-	                    field: 'job_benefits',
-	                    title: '工作福利',
+	                    field: 'time',
+	                    title: '时间',
 	                    align:"center",
 	                    halign:"center"
 	                },{
-	                    field: 'update_time',
-	                    title: '更新时间',
+	                    field: 'abstract',
+	                    title: '摘要',
 	                    align:"center",
 	                    halign:"center"
 	                }],
@@ -266,10 +179,11 @@
 		                rows: params.limit,                         //页面大小
 		                page: (params.offset / params.limit) + 1,   //页码
 
-                        city:$("#city").val(),
-                        job_experience:$("#job_experience").val(),
-                        education:$("#education").val(),
-                        post_type:$("#postType").val()
+                        title:$("#title").val(),
+                        link:$("#link").val(),
+                        source:$("#source").val(),
+                        time:$("#time").val(),
+                        abstract:$("#abstract").val()
 		            };
 		            return temp;
 		        },
@@ -280,17 +194,9 @@
 			      }
 			    });
 		});
-        function yongHuBangDing(value,row,index){
-				return "<a href='javascript:;' class='btn btn-xs green' onclick=\"checkCompany('" + row.number_id + "')\">"+value+"</a>";
-		}
        function btn_query_click(){
            $('#exampleTableEvents').bootstrapTable('selectPage', 1);
            $('#exampleTableEvents').bootstrapTable('refresh');
-
-//           console.log($("#city").val());
-//           console.log($("#job_experience").val());
-//           console.log($("#education").val());
-//           console.log($("#postType").val());
        }
 
        function checkCompany(numberId){

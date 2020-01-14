@@ -153,16 +153,17 @@ def Redirect(url):
 
 def baidu_search(wd, pn):
     #日志文件路径创建
-    root_path = 'C:\\logs\\'
+    # root_path = 'C:\\logs\\'
+    root_path = os.getcwd() + '\\logs\\'
     if not os.path.exists(root_path):
         os.makedirs(root_path)
-    fileName = str(datetime.datetime.now().strftime('%Y-%m-%d %H-%M-%S')) + '.txt'
+    fileName = str(datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')) + '.txt'
     full_path = root_path + fileName
     f = open(full_path,'w',encoding='utf8')
     res = {'filepath': full_path, 'data': []}
     #假数据
     # wd = '华制智能'
-    pn = 1
+    # pn = 1
     print('wd:'+wd+'pn:'+str(pn))
     pre_link = 'test'
     cnt = 0

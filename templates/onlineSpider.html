@@ -98,7 +98,7 @@
                     success: function (datas){
                         console.log(datas)
                         if(datas.msg=="success"){
-                            document.getElementById("mainIframe").src = "/static"+datas.data;
+                            document.getElementById("mainIframe").src = "/static/" + datas.filename;
                             $('#myModal2').modal('hide');
                             $("#downLoad").show();
                         }

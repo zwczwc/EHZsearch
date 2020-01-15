@@ -29,7 +29,6 @@ ALLOWED_HOSTS = []
 
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -37,10 +36,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    "dataView",
+    'dataView',
     'rest_framework',
     'dwebsocket',
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -85,7 +85,12 @@ DATABASES = {
         'HOST': '127.0.0.1',   #os.environ.get('DJANGO_MYSQL_HOST')
         'PORT': 3306,
         'CHARSET': 'utf8',
-        'COLLATION': 'utf8_general_ci'
+        'COLLATION': 'utf8_general_ci',
+        'TEST': {
+            'NAME': 'test_ehzsearch_data',
+            'CHARSET': 'utf8',
+            'COLLATION': 'utf8_general_ci'
+        },
     }
 }
 

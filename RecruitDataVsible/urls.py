@@ -33,6 +33,7 @@ urlpatterns = [
     path('job/onlineSpider', views.baiduNewsSpider),
     path('job/companyInfo', views.companyInfo),
     path('job/getNewsInfo', views.getNewsInfos),
+    path('getTrendByKeyword', views.getTrendByKeyword),
 ]
 
 if settings.DEBUG:

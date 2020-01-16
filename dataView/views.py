@@ -16,9 +16,9 @@ from django.db.models import F
 from django.db.models import Count
 from .models import news_info
 import operator
-from dwebsocket.decorators import accept_websocket,require_websocket
+from dwebsocket.decorators import accept_websocket, require_websocket
 
-#发送HTTP请求时的HEAD信息，用于伪装为浏览器
+# 发送HTTP请求时的HEAD信息，用于伪装为浏览器
 headersParameters = {
     'Connection': 'Keep-Alive',
     'Accept': 'text/html, application/xhtml+xml, */*',
@@ -26,6 +26,7 @@ headersParameters = {
     'Accept-Encoding': 'gzip, deflate',
     'User-Agent': 'Mozilla/6.1 (Windows NT 6.3; WOW64; Trident/7.0; rv:11.0) like Gecko'
 }
+
 
 def index(request):
     return render(request, 'index.html')
@@ -36,10 +37,12 @@ def index(request):
 # ----------------
 
 
-#request网页请求
+# request网页请求
 
-def pageConvert(request,pageName="index_i.html"):
-    return render(request, pageName,locals())
+def pageConvert(request, pageName="index_i.html"):
+    return render(request, pageName, locals())
+
+
 def getNewsInfos(request):
     key_word = {}
     page = request.GET.get("page", 1)
@@ -51,26 +54,26 @@ def getNewsInfos(request):
     result = getNewsInfoByPageAndRows(page, rows, key_word)
     return HttpResponse(json.dumps(result), content_type="application/json")
 
-def getNewsInfoByPageAndRows(page,rows,key_word):
-    news = news_info.objects.filter(Q(title__icontains=key_word["title"]) & Q(time__icontains=key_word["time"]) &Q(source__icontains=key_word["source"]))
-    paginator = Paginator(news,rows)
+
+def getNewsInfoByPageAndRows(page, rows, key_word):
+    news = news_info.objects.filter(Q(title__icontains=key_word["title"]) &
+                                    Q(time__icontains=key_word["time"]) & Q(source__icontains=key_word["source"]))
+    paginator = Paginator(news, rows)
     query_sets = paginator.page(page)
     return {"total": paginator.count, "rows": list(query_sets.object_list.values())}
 
 
 def getJobInfos(request):
-     key_word = {}
-     page = request.GET.get("page",1)
-     rows = request.GET.get("rows",10)
-     key_word["city"] = request.GET.get("city","")
-     key_word["job_experience"] = request.GET.get("job_experience", "")
-     key_word["education"] = request.GET.get("education", "")
-     key_word["post_type"] = request.GET.get("post_type", "")
+    key_word = {}
+    page = request.GET.get("page", 1)
+    rows = request.GET.get("rows", 10)
+    key_word["city"] = request.GET.get("city", "")
+    key_word["job_experience"] = request.GET.get("job_experience", "")
+    key_word["education"] = request.GET.get("education", "")
+    key_word["post_type"] = request.GET.get("post_type", "")
 
-     result = getJobsInfoByPageAndRows(page, rows, key_word)
-     return  HttpResponse(json.dumps(result), content_type="application/json")
-
-
+    result = getJobsInfoByPageAndRows(page, rows, key_word)
+    return HttpResponse(json.dumps(result), content_type="application/json")
 
 
 def getAvgSalaryEveryCity(request):
@@ -81,7 +84,7 @@ def getAvgSalaryEveryCity(request):
 def getJobCountsByEveryCity(request):
     re = getJobCountsByCity()
     result = {}
-    jobCountOfCity = sorted(re,key=lambda records:records['value'], reverse = True)[:36]
+    jobCountOfCity = sorted(re, key=lambda records: records['value'], reverse=True)[:36]
     result["jobCountOfCity"] = jobCountOfCity
 
     lngAndLatOfCity = {}
@@ -90,13 +93,14 @@ def getJobCountsByEveryCity(request):
     result["lngAndLatOfCity"] = lngAndLatOfCity
     return HttpResponse(json.dumps(result), content_type="application/json")
 
+
 def getAvgSalaryByCityAndJobType(request):
-    category = request.GET.get("category","岗位")
+    category = request.GET.get("category", "岗位")
 
     result = {}
     avgWage = getAvgSalaryByCatetory(category)
-    avgWage = sorted(avgWage.items(), key = operator.itemgetter(1), reverse = True)
-    if category=="城市":  #返回前100个
+    avgWage = sorted(avgWage.items(), key=operator.itemgetter(1), reverse=True)
+    if category == "城市":  # 返回前100个
         avgWage = avgWage[:200]
     names = []
     AvgWage = []
@@ -110,11 +114,11 @@ def getAvgSalaryByCityAndJobType(request):
 
 
 def getJobTypeCountByCity(request):
-    city = request.GET.get("city","北京")
-    jobTypeCountsDic = sorted(getEveryJobTypeCountsByCity(city),key=lambda x:x['count'], reverse=True)[:10]
+    city = request.GET.get("city", "北京")
+    jobTypeCountsDic = sorted(getEveryJobTypeCountsByCity(city), key=lambda x: x['count'], reverse=True)[:10]
     result = {}
-    names=[]
-    counts=[]
+    names = []
+    counts = []
     for var in jobTypeCountsDic:
         names.append(var["post_type"])
         counts.append(var["count"])
@@ -125,34 +129,36 @@ def getJobTypeCountByCity(request):
 
 
 def getEducationAndExperienceOfCity(request):
-     result = {}
-     educationName = []
-     jobExperienceName = []
-     postType = request.GET.get("post_type","Java开发")
+    result = {}
+    educationName = []
+    jobExperienceName = []
+    postType = request.GET.get("post_type", "Java开发")
 
-     educationDemands = getEducationDemandByJobType(postType)
-     jobExperienceDemands = getJobExperienceByJobType(postType)
+    educationDemands = getEducationDemandByJobType(postType)
+    jobExperienceDemands = getJobExperienceByJobType(postType)
 
-     for var in educationDemands:
-         educationName.append(var["name"])
+    for var in educationDemands:
+        educationName.append(var["name"])
 
-     for var in jobExperienceDemands:
-         jobExperienceName.append(var["name"])
+    for var in jobExperienceDemands:
+        jobExperienceName.append(var["name"])
 
-     result["seriesData"] = educationDemands
-     result["legendData"] = educationName
+    result["seriesData"] = educationDemands
+    result["legendData"] = educationName
 
-     result["seriesData2"] = jobExperienceDemands
-     result["legendData2"] = jobExperienceName
-     return HttpResponse(json.dumps(result), content_type="application/json")
+    result["seriesData2"] = jobExperienceDemands
+    result["legendData2"] = jobExperienceName
+    return HttpResponse(json.dumps(result), content_type="application/json")
+
 
 def Redirect(url):
     res = requests.get(url, timeout=10)
     newurl = res.url
     return newurl
 
+
 def baidu_search(wd, pn):
-    #日志文件路径创建
+    # 日志文件路径创建
     # root_path = 'C:\\logs\\'
     root_path = os.getcwd() + '\\static\\'
     # root_path = os.getcwd() + '\\'
@@ -160,12 +166,12 @@ def baidu_search(wd, pn):
         os.makedirs(root_path)
     fileName = str(datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')) + '.txt'
     full_path = root_path + fileName
-    f = open(full_path,'w',encoding='utf8')
+    f = open(full_path, 'w', encoding='utf8')
     res = {'filepath': full_path, 'filename': fileName, 'data': []}
-    #假数据
+    # 假数据
     # wd = '华制智能'
     # pn = 1
-    print('wd:'+wd+'pn:'+str(pn))
+    print('wd:' + wd + 'pn:' + str(pn))
     pre_link = 'test'
     cnt = 0
     # for i in range(0, (int(pn) - 1) * 10 + 1, 10):
@@ -188,7 +194,7 @@ def baidu_search(wd, pn):
             link = item.find('a').get('href').strip()
             if (link == pre_link):
                 break
-            if(flag_1):
+            if (flag_1):
                 pre_link = link
                 flag_1 = False
             # 重定向
@@ -197,9 +203,11 @@ def baidu_search(wd, pn):
             list_author = item.find('p', class_='c-author').get_text().strip().replace("\n", "").split('\xa0\xa0')
             source = list_author[0]
             tmpTime1 = list_author[1].lstrip()
-            list_abstract = item.find('div', class_='c-summary').get_text().strip().replace("\n", "").replace('\xa0','').replace('\t','').split()
-            #x小时前格式还是标准日期格式的判断,顺便格式化时间
-            if(list_abstract[2][2] == ':'):
+            list_abstract = item.find('div', class_='c-summary').get_text().strip().replace("\n", "").replace('\xa0',
+                                                                                                              '').replace(
+                '\t', '').split()
+            # x小时前格式还是标准日期格式的判断,顺便格式化时间
+            if (list_abstract[2][2] == ':') & (list_abstract[1][-1] == '日'):
                 abstract = list_abstract[3]
                 tmpTime2 = datetime.datetime(year=int(tmpTime1[0:4]), month=int(tmpTime1[5:7]), day=int(tmpTime1[8:10]),
                                              hour=int(tmpTime1[12:14]), minute=int(tmpTime1[15:17]), second=0)
@@ -214,7 +222,7 @@ def baidu_search(wd, pn):
                     timedelta = datetime.timedelta(minutes=int(tmpTime1[:-3]))
                     tmpTime2 = now - timedelta
             time = tmpTime2.strftime('%Y-%m-%d %H:%M:%S')
-            #写结果
+            # 写结果
             res_item = {}
             res_item['title'] = title
             res_item['link'] = link
@@ -222,11 +230,11 @@ def baidu_search(wd, pn):
             res_item['time'] = time
             res_item['abstract'] = abstract
             res['data'].append(res_item)
-            #写数据库，不重复插入
-            news_info.objects.get_or_create(title=title,link=link,source=source,time=time,abstract=abstract)
-            #写文件
+            # 写数据库，不重复插入
+            news_info.objects.get_or_create(title=title, link=link, source=source, time=time, abstract=abstract)
+            # 写文件
             f.write('-------------------\n')
-            f.write('标题：'+ title +'\n')
+            f.write('标题：' + title + '\n')
             f.write('链接：' + link + '\n')
             f.write('来源：' + source + '\n')
             f.write('日期：' + time + '\n')
@@ -234,13 +242,14 @@ def baidu_search(wd, pn):
             f.write('-------------------\n')
             # abstract = list(summary)[1]
             # print(title,link,source,time,abstract)
-            #csv_writer.writerow([title, link, source, time, abstract])
+            # csv_writer.writerow([title, link, source, time, abstract])
 
     print('endend')
     # 关闭文件
     f.close()
     return res
     # print(soup.prettify())
+
 
 def baiduNewsSpider(request):
     kw = request.GET.get("kw")
@@ -264,36 +273,52 @@ def baiduNewsSpider(request):
     # print(baidu_search(kw, pn))
 
 
+def getTrendByKeyword(request):
+    kw = request.GET.get("kw", '华制智能')
+    resQuery = news_info.objects.filter(Q(title__icontains=kw)).values('time').order_by('time')
+    timeDict = {}
+
+    for item in resQuery:
+        if (item['time'][:10] not in timeDict):
+            timeDict[item['time'][:10]] = 1
+        else:
+            timeDict[item['time'][:10]] += 1
+
+    res = {'time': list(timeDict.keys()), 'total': list(timeDict.values())}
+    return HttpResponse(json.dumps(res), content_type="application/json")
 
 
 def companyInfo(request):
-    numberid = request.GET.get("numberId","CC526060929")
+    numberid = request.GET.get("numberId", "CC526060929")
     return HttpResponse(json.dumps(getCompanyInfoByNumberId(numberid)), content_type="application/json")
 
-#request完
+
+# request完
 
 
+# 帮助方法
 
-#帮助方法
-
-def getJobsInfoByPageAndRows(page,rows,key_word):
-    jobs = Job.objects.filter(Q(city__icontains=key_word["city"]) & Q(job_experience__icontains=key_word["job_experience"]) &Q(education__icontains=key_word["education"]) &Q(post_type__icontains=key_word["post_type"]))
-    paginator = Paginator(jobs,rows)
+def getJobsInfoByPageAndRows(page, rows, key_word):
+    jobs = Job.objects.filter(
+        Q(city__icontains=key_word["city"]) & Q(job_experience__icontains=key_word["job_experience"]) & Q(
+            education__icontains=key_word["education"]) & Q(post_type__icontains=key_word["post_type"]))
+    paginator = Paginator(jobs, rows)
     query_sets = paginator.page(page)
 
-    return {"total":paginator.count,"rows":list(query_sets.object_list.values())}
+    return {"total": paginator.count, "rows": list(query_sets.object_list.values())}
+
 
 def getAvgSalaryByCatetory(category):
     result = {}
-    if category=="岗位":
+    if category == "岗位":
         allPostTypes = getSingleFiledAndDistinct("post_type")
         for postType in allPostTypes:
-            salaries = Job.objects.filter(post_type=postType).values("max_wage","min_wage")
+            salaries = Job.objects.filter(post_type=postType).values("max_wage", "min_wage")
             sa_num = 0.0
             for salary in salaries:
-                sa_num +=float(salary["max_wage"])+float(salary["min_wage"])
-            sa_num /= 2.0*len(salaries)
-            result[postType] = round(sa_num,1)
+                sa_num += float(salary["max_wage"]) + float(salary["min_wage"])
+            sa_num /= 2.0 * len(salaries)
+            result[postType] = round(sa_num, 1)
 
     elif category == "城市":
         allCities = getSingleFiledAndDistinct("city")
@@ -307,11 +332,15 @@ def getAvgSalaryByCatetory(category):
 
     return result
 
+
 def getSingleFiledAndDistinct(filed):
-    return list(Job.objects.values_list(filed,flat=True).distinct().order_by(filed))
+    return list(Job.objects.values_list(filed, flat=True).distinct().order_by(filed))
+
 
 def getJobCountsByCity():
-    return list(Job.objects.values('city').annotate(name=F('city'),value=Count('name')).values('name', 'value').order_by())
+    return list(
+        Job.objects.values('city').annotate(name=F('city'), value=Count('name')).values('name', 'value').order_by())
+
 
 # def getEducationDemandEveryJobType():
 #     result = {}
@@ -323,10 +352,16 @@ def getJobCountsByCity():
 
 
 def getEducationDemandByJobType(JobType):
-    return list(Job.objects.filter(post_type=JobType).values("education").annotate(name=F('education'),value=Count('name')).values('name', 'value').order_by())
+    return list(Job.objects.filter(post_type=JobType).values("education").annotate(name=F('education'),
+                                                                                   value=Count('name')).values('name',
+                                                                                                               'value').order_by())
+
 
 def getJobExperienceByJobType(JobType):
-    return list(Job.objects.filter(post_type=JobType).values("job_experience").annotate(name=F('job_experience'),value=Count('name')).values('name', 'value').order_by())
+    return list(Job.objects.filter(post_type=JobType).values("job_experience").annotate(name=F('job_experience'),
+                                                                                        value=Count('name')).values(
+        'name', 'value').order_by())
+
 
 # def getEveryJobTypeCountsEveryCity():
 #     result = {}
@@ -338,12 +373,12 @@ def getJobExperienceByJobType(JobType):
 
 
 def getEveryJobTypeCountsByCity(city):
-    return list(Job.objects.filter(city=city).values("post_type").annotate(count=Count('post_type')).values('post_type','count').order_by("count"))
+    return list(Job.objects.filter(city=city).values("post_type").annotate(count=Count('post_type')).values('post_type',
+                                                                                                            'count').order_by(
+        "count"))
 
 
 def getCompanyInfoByNumberId(numberId):
     return list(Company.objects.filter(number=numberId).values())
 
-
-#帮助方法完
-
+# 帮助方法完

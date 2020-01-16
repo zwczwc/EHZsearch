@@ -10,7 +10,9 @@ import requests  # 导入requests包
 from bs4 import BeautifulSoup
 import datetime
 import os
+import pandas as pd
 from pandas import Series
+from pandas.tseries.offsets import *
 from django.db.models import Q
 from django.db.models import F
 from django.db.models import Count
@@ -56,8 +58,20 @@ def getNewsInfos(request):
 
 
 def getNewsInfoByPageAndRows(page, rows, key_word):
+
+    #用pandas算时间偏移量
+    if(key_word["time"]=='一周内'):
+        queryTime = (pd.datetime.now() - DateOffset(weeks= 1)).strftime('%Y-%m-%d %H:%M:%S')
+    elif(key_word["time"] == '一月内'):
+        queryTime = (pd.datetime.now() - DateOffset(months= 1)).strftime('%Y-%m-%d %H:%M:%S')
+    elif (key_word["time"] == '一年内'):
+        queryTime = (pd.datetime.now() - DateOffset(years= 1)).strftime('%Y-%m-%d %H:%M:%S')
+    else:
+        queryTime = ''
+    #时间范围用time__gte
     news = news_info.objects.filter(Q(title__icontains=key_word["title"]) &
-                                    Q(time__icontains=key_word["time"]) & Q(source__icontains=key_word["source"]))
+                                    Q(time__gte=queryTime) & Q(source__icontains=key_word["source"]))
+
     paginator = Paginator(news, rows)
     query_sets = paginator.page(page)
     return {"total": paginator.count, "rows": list(query_sets.object_list.values())}

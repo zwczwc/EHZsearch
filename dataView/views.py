@@ -286,7 +286,7 @@ def baiduNewsSpider(request):
 
     # print(baidu_search(kw, pn))
 
-
+#关键词趋势变化
 def getTrendByKeyword(request):
     kw = request.GET.get("kw", '华制智能')
     resQuery = news_info.objects.filter(Q(title__icontains=kw)).values('time').order_by('time')

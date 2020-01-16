@@ -214,12 +214,12 @@ def baidu_search(wd, pn):
                     timedelta = datetime.timedelta(minutes=int(tmpTime1[:-3]))
                     tmpTime2 = now - timedelta
             time = tmpTime2.strftime('%Y-%m-%d %H:%M:%S')
+            #写结果
             res_item = {}
             res_item['title'] = title
             res_item['link'] = link
             res_item['source'] = source
             res_item['time'] = time
-
             res_item['abstract'] = abstract
             res['data'].append(res_item)
             #写数据库，不重复插入

@@ -52,9 +52,9 @@ def getNewsInfos(request):
     page = request.GET.get("page", 1)
     rows = request.GET.get("rows", 10)
     key_word["title"] = request.GET.get("title", "")
-    #固定时间内
-    #key_word["time"] = request.GET.get("time", "")
-    #时间区间自定义
+    # 固定时间内
+    # key_word["time"] = request.GET.get("time", "")
+    # 时间区间自定义
     key_word["timeFrom"] = request.GET.get("timeFrom", "空")
     key_word["timeTo"] = request.GET.get("timeTo", "")
     key_word["source"] = request.GET.get("source", "")
@@ -64,8 +64,7 @@ def getNewsInfos(request):
 
 
 def getNewsInfoByPageAndRows(page, rows, key_word):
-
-    #用pandas算时间偏移量
+    # 用pandas算时间偏移量
     # if(key_word["time"]=='一周内'):
     #     queryTime = (pd.datetime.now() - DateOffset(weeks= 1)).strftime('%Y-%m-%d %H:%M:%S')
     # elif(key_word["time"] == '一月内'):
@@ -78,15 +77,16 @@ def getNewsInfoByPageAndRows(page, rows, key_word):
     # 时间范围用time__gte
     # news = news_info.objects.filter(Q(title__icontains=key_word["title"]) &
     #                                     Q(time__gte=queryTime) & Q(source__icontains=key_word["source"]))
-    if(key_word["timeFrom"]=='空'):
+    if (key_word["timeFrom"] == '空'):
         news = news_info.objects.filter(Q(title__icontains=key_word["title"]) &
                                         Q(source__icontains=key_word["source"])).order_by('-time')
     else:
-        #时间区间查询法
-        timeFrom = key_word["timeFrom"] +' 00:00:00'
+        # 时间区间查询法
+        timeFrom = key_word["timeFrom"] + ' 00:00:00'
         timeTo = key_word["timeTo"] + ' 23:59:59'
         news = news_info.objects.filter(Q(title__icontains=key_word["title"]) &
-               Q(time__gte=timeFrom)& Q(time__lte=timeTo) & Q(source__icontains=key_word["source"])).order_by('-time')
+                                        Q(time__gte=timeFrom) & Q(time__lte=timeTo) & Q(
+            source__icontains=key_word["source"])).order_by('-time')
 
     paginator = Paginator(news, rows)
     query_sets = paginator.page(page)
@@ -167,15 +167,18 @@ def getEducationAndExperienceOfCity(request):
     result["legendData2"] = jobExperienceName
     return HttpResponse(json.dumps(result), content_type="application/json")
 
+
 def addKeyword(request):
-    keyword = request.GET.get('kw','')
-    keyword_info.objects.get_or_create(name = keyword)
+    keyword = request.GET.get('kw', '')
+    keyword_info.objects.get_or_create(name=keyword)
     return HttpResponse(json.dumps({'msg': 'success'}), content_type="application/json")
 
+
 def getKeyword(request):
-    resQuery = keyword_info.objects.values_list('name',flat=True)
+    resQuery = keyword_info.objects.values_list('name', flat=True)
     res = {'data': list(resQuery)}
-    return HttpResponse(json.dumps(res,ensure_ascii=False), content_type="application/json",charset='utf-8')
+    return HttpResponse(json.dumps(res, ensure_ascii=False), content_type="application/json", charset='utf-8')
+
 
 def Redirect(url):
     res = requests.get(url, timeout=10)
@@ -197,19 +200,21 @@ def baidu_search(wd, pn, timeFrom, timeTo):
     # 假数据
     # wd = '华制智能'
     # pn = 1
-    #print('wd:' + wd + 'pn:' + str(pn))
+    # print('wd:' + wd + 'pn:' + str(pn))
     pre_link = 'test'
 
     # for i in range(0, (int(pn) - 1) * 10 + 1, 10):
     for i in range(0, (int(pn) - 1) * 10 + 1, 10):
         # 拼接url,判断是否需要按时间范围搜索
-        if(timeFrom == '空'):
+        if (timeFrom == '空'):
             url = 'https://www.baidu.com/s?rtt=1&bsst=1&cl=2&wd=' + wd + '&tn=news&ie=utf-8&pn=' + str(i)
         else:
-            timeFromStamp = int(time.mktime(time.strptime(timeFrom, "%Y-%m-%d")))
-            timeToStamp = int(time.mktime(time.strptime(timeTo, "%Y-%m-%d")))
+
+
+            timeFromStamp = int(time.mktime(time.strptime(timeFrom, "%Y-%m-%d %H:%M:%S")))
+            timeToStamp = int(time.mktime(time.strptime(timeTo, "%Y-%m-%d %H:%M:%S")))
             url = 'https://www.baidu.com/s?rtt=1&bsst=1&cl=2&wd=' + wd + '&tn=news&ie=utf-8&pn=' + str(i) + \
-                  '&gpc=stf%3D'+ str(timeFromStamp) + '%2C'+ str(timeToStamp) + '%7Cstftype%3D2'
+                  '&gpc=stf%3D' + str(timeFromStamp) + '%2C' + str(timeToStamp) + '%7Cstftype%3D2'
         # Get方式获取网页数据
         strhtml = requests.get(url, headers=headersParameters)
         strhtml.encoding = "utf-8"
@@ -281,10 +286,13 @@ def baidu_search(wd, pn, timeFrom, timeTo):
 
 
 def baiduNewsSpider(request):
-    kw = request.GET.get("kw",'华制智能')
-    pn = request.GET.get("pn",'1')
-    timeFrom = request.GET.get("timeFrom",'空')
-    timeTo = request.GET.get("timeTo",'空')
+    kw = request.GET.get("kw", '华制智能')
+    pn = request.GET.get("pn", '1')
+    timeFrom = request.GET.get("timeFrom", '空')
+    timeTo = request.GET.get("timeTo", '空')
+    if(timeFrom != '空'):
+        timeFrom += ' 00:00:00'
+        timeTo += ' 23:59:59'
     # try:
     res = baidu_search(kw, pn, timeFrom, timeTo)
     res['msg'] = 'success'
@@ -303,7 +311,8 @@ def baiduNewsSpider(request):
 
     # print(baidu_search(kw, pn))
 
-#关键词趋势变化
+
+# 关键词趋势变化
 def getTrendByKeyword(request):
     kw = request.GET.get("kw", '华制智能')
     resQuery = news_info.objects.filter(Q(title__icontains=kw)).values('time').order_by('time')

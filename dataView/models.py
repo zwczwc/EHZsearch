@@ -14,3 +14,6 @@ class news_info(models.Model):
     source = models.CharField(max_length=255)
     time = models.CharField(max_length=255)
     abstract = models.CharField(max_length=255)
+
+class keyword_info(models.Model):
+    name = models.CharField(max_length=255)

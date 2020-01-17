@@ -18,6 +18,7 @@ from django.db.models import Q
 from django.db.models import F
 from django.db.models import Count
 from .models import news_info
+from .models import keyword_info
 import operator
 from dwebsocket.decorators import accept_websocket, require_websocket
 
@@ -165,6 +166,15 @@ def getEducationAndExperienceOfCity(request):
     result["legendData2"] = jobExperienceName
     return HttpResponse(json.dumps(result), content_type="application/json")
 
+def addKeyword(request):
+    keyword = request.GET.get('kw','')
+    keyword_info.objects.get_or_create(name = keyword)
+    return HttpResponse(json.dumps({'msg': 'success'}), content_type="application/json")
+
+def getKeyword(request):
+    resQuery = keyword_info.objects.values_list('name',flat=True)
+    res = {'data': list(resQuery)}
+    return HttpResponse(json.dumps(res,ensure_ascii=False), content_type="application/json",charset='utf-8')
 
 def Redirect(url):
     res = requests.get(url, timeout=10)

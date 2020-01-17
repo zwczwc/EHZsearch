@@ -24,7 +24,6 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
 
     path('page/<pageName>',views.pageConvert),
-    path('job/getJobsInfo',views.getJobInfos),
     path('job/AvgSalaryEveryCity',views.getAvgSalaryEveryCity),
     path('job/jobCountsEveryCity',views.getJobCountsByEveryCity),
     path('job/avgWage',views.getAvgSalaryByCityAndJobType),

@@ -9,6 +9,7 @@ from RecruitDataVsible import settings
 import requests  # 导入requests包
 from bs4 import BeautifulSoup
 import datetime
+import time
 import os
 import pandas as pd
 from pandas import Series
@@ -51,6 +52,9 @@ def getNewsInfos(request):
     rows = request.GET.get("rows", 10)
     key_word["title"] = request.GET.get("title", "")
     key_word["time"] = request.GET.get("time", "")
+    #时间区间
+    key_word["timeFrom"] = request.GET.get("timeFrom", "空")
+    key_word["timeTo"] = request.GET.get("timeTo", "")
     key_word["source"] = request.GET.get("source", "")
 
     result = getNewsInfoByPageAndRows(page, rows, key_word)
@@ -60,34 +64,31 @@ def getNewsInfos(request):
 def getNewsInfoByPageAndRows(page, rows, key_word):
 
     #用pandas算时间偏移量
-    if(key_word["time"]=='一周内'):
-        queryTime = (pd.datetime.now() - DateOffset(weeks= 1)).strftime('%Y-%m-%d %H:%M:%S')
-    elif(key_word["time"] == '一月内'):
-        queryTime = (pd.datetime.now() - DateOffset(months= 1)).strftime('%Y-%m-%d %H:%M:%S')
-    elif (key_word["time"] == '一年内'):
-        queryTime = (pd.datetime.now() - DateOffset(years= 1)).strftime('%Y-%m-%d %H:%M:%S')
+    # if(key_word["time"]=='一周内'):
+    #     queryTime = (pd.datetime.now() - DateOffset(weeks= 1)).strftime('%Y-%m-%d %H:%M:%S')
+    # elif(key_word["time"] == '一月内'):
+    #     queryTime = (pd.datetime.now() - DateOffset(months= 1)).strftime('%Y-%m-%d %H:%M:%S')
+    # elif (key_word["time"] == '一年内'):
+    #     queryTime = (pd.datetime.now() - DateOffset(years= 1)).strftime('%Y-%m-%d %H:%M:%S')
+    # else:
+    #     queryTime = ''
+
+    # 时间范围用time__gte
+    # news = news_info.objects.filter(Q(title__icontains=key_word["title"]) &
+    #                                     Q(time__gte=queryTime) & Q(source__icontains=key_word["source"]))
+    if(key_word["timeFrom"]=='空'):
+        news = news_info.objects.filter(Q(title__icontains=key_word["title"]) &
+                                        Q(source__icontains=key_word["source"])).order_by('-time')
     else:
-        queryTime = ''
-    #时间范围用time__gte
-    news = news_info.objects.filter(Q(title__icontains=key_word["title"]) &
-                                    Q(time__gte=queryTime) & Q(source__icontains=key_word["source"]))
+        #时间区间查询法
+        timeFrom = key_word["timeFrom"] +' 00:00:00'
+        timeTo = key_word["timeTo"] + ' 23:59:59'
+        news = news_info.objects.filter(Q(title__icontains=key_word["title"]) &
+               Q(time__gte=timeFrom)& Q(time__lte=timeTo) & Q(source__icontains=key_word["source"])).order_by('-time')
 
     paginator = Paginator(news, rows)
     query_sets = paginator.page(page)
     return {"total": paginator.count, "rows": list(query_sets.object_list.values())}
-
-
-def getJobInfos(request):
-    key_word = {}
-    page = request.GET.get("page", 1)
-    rows = request.GET.get("rows", 10)
-    key_word["city"] = request.GET.get("city", "")
-    key_word["job_experience"] = request.GET.get("job_experience", "")
-    key_word["education"] = request.GET.get("education", "")
-    key_word["post_type"] = request.GET.get("post_type", "")
-
-    result = getJobsInfoByPageAndRows(page, rows, key_word)
-    return HttpResponse(json.dumps(result), content_type="application/json")
 
 
 def getAvgSalaryEveryCity(request):
@@ -171,7 +172,7 @@ def Redirect(url):
     return newurl
 
 
-def baidu_search(wd, pn):
+def baidu_search(wd, pn, timeFrom, timeTo):
     # 日志文件路径创建
     # root_path = 'C:\\logs\\'
     root_path = os.getcwd() + '\\static\\'
@@ -185,14 +186,19 @@ def baidu_search(wd, pn):
     # 假数据
     # wd = '华制智能'
     # pn = 1
-    print('wd:' + wd + 'pn:' + str(pn))
+    #print('wd:' + wd + 'pn:' + str(pn))
     pre_link = 'test'
-    cnt = 0
+
     # for i in range(0, (int(pn) - 1) * 10 + 1, 10):
     for i in range(0, (int(pn) - 1) * 10 + 1, 10):
-        # 拼接url
-        # url = 'https://www.baidu.com/baidu?wd='+wd+'&tn=monline_dg&ie=utf-8&pn='+str(i)
-        url = 'https://www.baidu.com/s?rtt=1&bsst=1&cl=2&wd=' + wd + '&tn=news&ie=utf-8&pn=' + str(i)
+        # 拼接url,判断是否需要按时间范围搜索
+        if(timeFrom == '空'):
+            url = 'https://www.baidu.com/s?rtt=1&bsst=1&cl=2&wd=' + wd + '&tn=news&ie=utf-8&pn=' + str(i)
+        else:
+            timeFromStamp = int(time.mktime(time.strptime(timeFrom, "%Y-%m-%d")))
+            timeToStamp = int(time.mktime(time.strptime(timeTo, "%Y-%m-%d")))
+            url = 'https://www.baidu.com/s?rtt=1&bsst=1&cl=2&wd=' + wd + '&tn=news&ie=utf-8&pn=' + str(i) + \
+                  '&gpc=stf%3D'+ str(timeFromStamp) + '%2C'+ str(timeToStamp) + '%7Cstftype%3D2'
         # Get方式获取网页数据
         strhtml = requests.get(url, headers=headersParameters)
         strhtml.encoding = "utf-8"
@@ -235,27 +241,25 @@ def baidu_search(wd, pn):
                     now = datetime.datetime.now()
                     timedelta = datetime.timedelta(minutes=int(tmpTime1[:-3]))
                     tmpTime2 = now - timedelta
-            time = tmpTime2.strftime('%Y-%m-%d %H:%M:%S')
+            resTime = tmpTime2.strftime('%Y-%m-%d %H:%M:%S')
             # 写结果
             res_item = {}
             res_item['title'] = title
             res_item['link'] = link
             res_item['source'] = source
-            res_item['time'] = time
+            res_item['time'] = resTime
             res_item['abstract'] = abstract
             res['data'].append(res_item)
             # 写数据库，不重复插入
-            news_info.objects.get_or_create(title=title, link=link, source=source, time=time, abstract=abstract)
+            news_info.objects.get_or_create(title=title, link=link, source=source, time=resTime, abstract=abstract)
             # 写文件
             f.write('-------------------\n')
             f.write('标题：' + title + '\n')
             f.write('链接：' + link + '\n')
             f.write('来源：' + source + '\n')
-            f.write('日期：' + time + '\n')
+            f.write('日期：' + resTime + '\n')
             f.write('摘要：' + abstract + '\n')
             f.write('-------------------\n')
-            # abstract = list(summary)[1]
-            # print(title,link,source,time,abstract)
             # csv_writer.writerow([title, link, source, time, abstract])
 
     print('endend')
@@ -266,10 +270,12 @@ def baidu_search(wd, pn):
 
 
 def baiduNewsSpider(request):
-    kw = request.GET.get("kw")
-    pn = request.GET.get("pn")
+    kw = request.GET.get("kw",'华制智能')
+    pn = request.GET.get("pn",'1')
+    timeFrom = request.GET.get("timeFrom",'空')
+    timeTo = request.GET.get("timeTo",'空')
     # try:
-    res = baidu_search(kw, pn)
+    res = baidu_search(kw, pn, timeFrom, timeTo)
     res['msg'] = 'success'
     return HttpResponse(json.dumps(res), content_type="application/json")
     # except Exception:

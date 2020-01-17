@@ -11,7 +11,8 @@
     <meta name="keywords" content="">
     <meta name="description" content="">
 
-    <link rel="shortcut icon" href="{% static 'favicon.ico' %}"> <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="shortcut icon" href="{% static 'favicon.ico' %}">
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
     <link href="{% static 'css/font-awesome.css' %}" rel="stylesheet">
     <link href="{% static 'css/daterangepicker-bs3.css' %}" rel="stylesheet">
 
@@ -41,7 +42,7 @@
                                   <option value="Web前端">Web前端</option> -->
                                <!-- </select> -->
                                 <input type="text" value="76" class="form-control" id="page"/>
-                                
+
                                 <!--日历-->
                                 <input type="text" name="reservation" id="reservation" class="form-control" />
 
@@ -88,7 +89,8 @@
     <!-- 自定义js -->
     <script src="{% static 'js/content.js' %}"></script>
     <script src="{% static 'js/daterangepicker.js' %}"></script>
-    
+
+
     <script>
             function getDay(day) {          // 获取年月日
                 var today = new Date();
@@ -109,6 +111,7 @@
                 }
                 return m;
             }
+
             $('#reservation').daterangepicker(null, function (start, end, label) {
                 console.log(start.toISOString(), end.toISOString(), label);
             }).val(getDay(0));
@@ -117,6 +120,10 @@
                 console.log("开始爬取", $("#kw").val() )
                 var str = $("#reservation").val();
                 var strArr = str.split("-");
+                var firstTime = strArr[0] + "-" + strArr[1] + "-" + strArr[2];
+                var secondTime = strArr[3] + "-" + strArr[4] + "-" + strArr[5];
+                firstTimeStr=firstTime.replace(/\s+/g,"");   //js去掉右空格
+                secondTimeStr=secondTime.replace(/\s+/g,"");
                  $("#myModal2").modal({
                     backdrop: "static", // 相当于data-backdrop
                     keyboard: false, // 相当于data-keyboard
@@ -127,12 +134,8 @@
                     type : "get",    //请求类型
                     url : "/job/onlineSpider",//请求的 URL地址
                     dataType : "json",//返回的数据类型
-                    data:{
-                        "kw":$("#kw").val(),
-                        "pn": $("#page").val(),
-                        "timeFrom": strArr[0] + "-" + strArr[1] + "-" + strArr[2],
-                        "timeTo": strArr[3] + "-" + strArr[4] + "-" + strArr[5]},
-                    success: function (datas){   
+                    data:{"kw":$("#kw").val(),"pn": $("#page").val(),"timeFrom": firstTimeStr,"timeTo": secondTimeStr},
+                    success: function (datas){
                         console.log(datas)
                         if(datas.msg=="success"){
                             document.getElementById("mainIframe").src = "/static/" + datas.filename;
@@ -150,8 +153,7 @@
                window.downloadFile(document.getElementById("mainIframe").src);
             });
 
-
-         window.downloadFile = function (sUrl) {
+        window.downloadFile = function (sUrl) {
 
     //iOS devices do not support downloading. We have to inform user about this.
     if (/(iP)/g.test(navigator.userAgent)) {

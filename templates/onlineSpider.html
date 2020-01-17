@@ -7,16 +7,17 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-
     <title> - 论坛</title>
     <meta name="keywords" content="">
     <meta name="description" content="">
 
     <link rel="shortcut icon" href="{% static 'favicon.ico' %}"> <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
     <link href="{% static 'css/font-awesome.css' %}" rel="stylesheet">
+    <link href="{% static 'css/daterangepicker-bs3.css' %}" rel="stylesheet">
+
     <link href="{% static 'css/animate.css' %}" rel="stylesheet">
     <link href="{% static 'css/style.css' %}" rel="stylesheet">
-
+    <link href="{% static 'css/fontawesome-webfont.woff' %}" rel="stylesheet">
 
 </head>
 
@@ -30,9 +31,9 @@
 
                         <div class="ibox-content m-b-sm border-bottom">
                             <div class="input-group input-group-sm" style="position: relative;">
-                                <span class="input-group-addon">要爬取的关键字和页码</span>
+                                <span class="input-group-addon">请输入关键字、页码、时间</span>
 
-<!--                                换搜索框 要爬取到百度的关键字-->
+                              <!-- 换搜索框 要爬取到百度的关键字-->
                                 <input type="text" placeholder="请输入您需搜索要的内容 …" class="form-control" id="kw"/>
                                <!-- <select type="text" class="form-control" id="kw"> -->
                                   <!-- <option value="Java开发">Java开发</option>
@@ -40,6 +41,10 @@
                                   <option value="Web前端">Web前端</option> -->
                                <!-- </select> -->
                                 <input type="text" value="76" class="form-control" id="page"/>
+                                
+                                <!--日历-->
+                                <input type="text" name="reservation" id="reservation" class="form-control" />
+
                                 <button type="button" class="form-control" id="startSpide">开始</button>
                                 <button type="button" class="form-control" id="downLoad" style="width:100px;height:50px;position: absolute;top:91px;right:27px;display: none;">下载</button>
                             </div>
@@ -73,18 +78,46 @@
                 </div>
             </div>
     </div>
+
     <!-- 全局js -->
     <script src="{% static 'js/jquery.min.js' %}"></script>
     <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'js/moment.js' %}"></script>
     <!-- Peity -->
     <script src="{% static 'js/plugins/peity/jquery.peity.min.js' %}"></script>
     <!-- 自定义js -->
     <script src="{% static 'js/content.js' %}"></script>
+    <script src="{% static 'js/daterangepicker.js' %}"></script>
+    
     <script>
+            function getDay(day) {          // 获取年月日
+                var today = new Date();
+                var targetday_milliseconds = today.getTime() + 1000 * 60 * 60 * 24 * day;
+                today.setTime(targetday_milliseconds); // 注意，这行是关键代码
+                var tYear = today.getFullYear();
+                var tMonth = today.getMonth();
+                var tDate = today.getDate();
+                tMonth = doHandleMonth(tMonth + 1);
+                tDate = doHandleMonth(tDate);
+                console.log(tYear + "-" + tMonth + "-" + tDate)
+                return tYear + "-" + tMonth + "-" + tDate +  "-" +  tYear + "-" + tMonth + "-" + tDate;
+            }
+            function doHandleMonth(month) {  // 月份处理
+                var m = month;
+                if (month.toString().length == 1) {
+                    m = "0" + month;
+                }
+                return m;
+            }
+            $('#reservation').daterangepicker(null, function (start, end, label) {
+                console.log(start.toISOString(), end.toISOString(), label);
+            }).val(getDay(0));
 
             $("#startSpide").click(function(event){
                 console.log("开始爬取", $("#kw").val() )
-                $("#myModal2").modal({
+                var str = $("#reservation").val();
+                var strArr = str.split("-");
+                 $("#myModal2").modal({
                     backdrop: "static", // 相当于data-backdrop
                     keyboard: false, // 相当于data-keyboard
                     show: true  // 相当于data-show
@@ -94,8 +127,12 @@
                     type : "get",    //请求类型
                     url : "/job/onlineSpider",//请求的 URL地址
                     dataType : "json",//返回的数据类型
-                    data:{"kw":$("#kw").val(), "pn": $("#page").val()},
-                    success: function (datas){
+                    data:{
+                        "kw":$("#kw").val(),
+                        "pn": $("#page").val(),
+                        "timeFrom": strArr[0] + "-" + strArr[1] + "-" + strArr[2],
+                        "timeTo": strArr[3] + "-" + strArr[4] + "-" + strArr[5]},
+                    success: function (datas){   
                         console.log(datas)
                         if(datas.msg=="success"){
                             document.getElementById("mainIframe").src = "/static/" + datas.filename;

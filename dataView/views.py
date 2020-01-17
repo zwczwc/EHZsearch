@@ -52,8 +52,9 @@ def getNewsInfos(request):
     page = request.GET.get("page", 1)
     rows = request.GET.get("rows", 10)
     key_word["title"] = request.GET.get("title", "")
-    key_word["time"] = request.GET.get("time", "")
-    #时间区间
+    #固定时间内
+    #key_word["time"] = request.GET.get("time", "")
+    #时间区间自定义
     key_word["timeFrom"] = request.GET.get("timeFrom", "空")
     key_word["timeTo"] = request.GET.get("timeTo", "")
     key_word["source"] = request.GET.get("source", "")

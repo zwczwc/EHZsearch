@@ -200,7 +200,18 @@ def baidu_search(wd, pn, timeFrom, timeTo):
     fileName = str(datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')) + '.txt'
     full_path = root_path + fileName
     f = open(full_path, 'w', encoding='utf8')
-    res = {'filepath': full_path, 'filename': fileName, 'data': []}
+    # 清空数据表
+    news_info.objects.all().delete()
+    # 取爬虫结果首页的url
+    if (timeFrom == '空'):
+        url = 'https://www.baidu.com/s?rtt=1&bsst=1&cl=2&wd=' + wd + '&tn=news&ie=utf-8&pn=0'
+    else:
+        timeFromStamp = int(time.mktime(time.strptime(timeFrom, "%Y-%m-%d %H:%M:%S")))
+        timeToStamp = int(time.mktime(time.strptime(timeTo, "%Y-%m-%d %H:%M:%S")))
+        url = 'https://www.baidu.com/s?rtt=1&bsst=1&cl=2&wd=' + wd + '&tn=news&ie=utf-8&pn=0' + \
+              '&gpc=stf%3D' + str(timeFromStamp) + '%2C' + str(timeToStamp) + '%7Cstftype%3D2'
+
+    res = {'filepath': full_path, 'filename': fileName, 'url': url, 'data': []}
     # 假数据
     # wd = '华制智能'
     # pn = 1

@@ -179,10 +179,12 @@ def getKeyword(request):
     res = {'data': list(resQuery)}
     return HttpResponse(json.dumps(res, ensure_ascii=False), content_type="application/json", charset='utf-8')
 
+
 def deleteKeyword(request):
     keyword = request.GET.get('kw', '')
     keyword_info.objects.filter(name=keyword).delete()
     return HttpResponse(json.dumps({'msg': 'success'}), content_type="application/json")
+
 
 def Redirect(url):
     res = requests.get(url, timeout=10)
@@ -224,7 +226,6 @@ def baidu_search(wd, pn, timeFrom, timeTo):
         if (timeFrom == '空'):
             url = 'https://www.baidu.com/s?rtt=1&bsst=1&cl=2&wd=' + wd + '&tn=news&ie=utf-8&pn=' + str(i)
         else:
-
 
             timeFromStamp = int(time.mktime(time.strptime(timeFrom, "%Y-%m-%d %H:%M:%S")))
             timeToStamp = int(time.mktime(time.strptime(timeTo, "%Y-%m-%d %H:%M:%S")))
@@ -305,7 +306,7 @@ def baiduNewsSpider(request):
     pn = request.GET.get("pn", '1')
     timeFrom = request.GET.get("timeFrom", '空')
     timeTo = request.GET.get("timeTo", '空')
-    if(timeFrom != '空'):
+    if (timeFrom != '空'):
         timeFrom += ' 00:00:00'
         timeTo += ' 23:59:59'
     # try:
@@ -327,10 +328,13 @@ def baiduNewsSpider(request):
     # print(baidu_search(kw, pn))
 
 
-# 关键词趋势变化
+# 关键词趋势变化图
 def getTrendByKeyword(request):
     kw = request.GET.get("kw", '华制智能')
-    resQuery = news_info.objects.filter(Q(title__icontains=kw)).values('time').order_by('time')
+    # 多次结果中筛选
+    #resQuery = news_info.objects.filter(Q(title__icontains=kw)).values('time').order_by('time')
+    # 只针对一次
+    resQuery = news_info.objects.all().values('time').order_by('time')
     timeDict = {}
 
     for item in resQuery:
@@ -341,6 +345,24 @@ def getTrendByKeyword(request):
 
     res = {'time': list(timeDict.keys()), 'total': list(timeDict.values())}
     return HttpResponse(json.dumps(res), content_type="application/json")
+
+
+# 关键词的来源图
+def getSourceChartByKeyword(request):
+    kw = request.GET.get("kw", '华制智能')
+    # 多次结果中筛选
+    # resQuery = news_info.objects.filter(Q(title__icontains=kw)).values('source').order_by('time')
+    # 只针对一次
+    resQuery = news_info.objects.all().values('source')
+    sourceDict = {}
+    for item in resQuery:
+        if (item['source'] not in sourceDict):
+            sourceDict[item['source']] = 1
+        else:
+            sourceDict[item['source']] += 1
+
+    res = {'source': list(sourceDict.keys()), 'total': list(sourceDict.values())}
+    return HttpResponse(json.dumps(res, ensure_ascii=False), content_type="application/json")
 
 
 def companyInfo(request):

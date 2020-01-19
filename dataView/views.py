@@ -179,6 +179,10 @@ def getKeyword(request):
     res = {'data': list(resQuery)}
     return HttpResponse(json.dumps(res, ensure_ascii=False), content_type="application/json", charset='utf-8')
 
+def deleteKeyword(request):
+    keyword = request.GET.get('kw', '')
+    keyword_info.objects.filter(name=keyword).delete()
+    return HttpResponse(json.dumps({'msg': 'success'}), content_type="application/json")
 
 def Redirect(url):
     res = requests.get(url, timeout=10)

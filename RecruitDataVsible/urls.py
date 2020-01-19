@@ -35,6 +35,7 @@ urlpatterns = [
     path('getTrendByKeyword', views.getTrendByKeyword),
     path('getKeyword', views.getKeyword),
     path('addKeyword', views.addKeyword),
+    path('deleteKeyword',views.deleteKeyword),
 ]
 
 if settings.DEBUG:

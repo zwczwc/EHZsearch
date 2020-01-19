@@ -52,7 +52,7 @@
                                         <div class="form-group">
                                             <label for="title" class="sr-only">标题</label>
                                             <input type="text" placeholder="标题" id="title"
-                                                   class="form-control">
+                                                   class="form-control" autocomplete="off">
                                         </div>
                                         <!-- <div class="form-group form-group-sm">
                                             <label for="time" class="sr-only">时间</label>
@@ -65,7 +65,7 @@
                                             </select>
                                         </div> -->
 <!--                                        时间-->
-                                        <input type="text" name="reservation" id="reservation" class="form-control" />
+                                        <input type="text" name="reservation" id="reservation" class="form-control" autocomplete="off" placeholder="请选择日期"/>
 
                                         <div class="form-group form-group-sm">
                                             <label for="source" class="sr-only">文章类型</label>
@@ -136,28 +136,9 @@
     <!-- Peity -->
     <script type="text/javascript">
 
-        function getDay(day) {          // 获取年月日
-            var today = new Date();
-            var targetday_milliseconds = today.getTime() + 1000 * 60 * 60 * 24 * day;
-            today.setTime(targetday_milliseconds); // 注意，这行是关键代码
-            var tYear = today.getFullYear();
-            var tMonth = today.getMonth();
-            var tDate = today.getDate();
-            tMonth = doHandleMonth(tMonth + 1);
-            tDate = doHandleMonth(tDate);
-            console.log(tYear + "-" + tMonth + "-" + tDate)
-            return tYear + "-" + tMonth + "-" + tDate +  "-" +  tYear + "-" + tMonth + "-" + tDate;
-        }
-        function doHandleMonth(month) {  // 月份处理
-            var m = month;
-            if (month.toString().length == 1) {
-                m = "0" + month;
-            }
-            return m;
-        }
         $('#reservation').daterangepicker(null, function (start, end, label) {
             console.log(start.toISOString(), end.toISOString(), label);
-        }).val(getDay(0));
+        }).val("");
 
 		$(function(){
 			$('#exampleTableEvents').bootstrapTable({
@@ -227,7 +208,7 @@
                         // 时间
                         timeFrom:firstTimeStr,
                         timeTo:secondTimeStr
-		            };
+		            }; 
 		            return temp;
 		        },
 			      icons: {

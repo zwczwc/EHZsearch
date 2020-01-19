@@ -23,7 +23,7 @@
             myChart.resize();
         }
 
-        $.get('/job/avgWage', function (avgWage) {
+        $.get('/job/getNewsInfo', function (avgWage) {
             myChart.hideLoading();
             jobTypeData = avgWage;
 
@@ -129,6 +129,7 @@
             };
 
             myChart.setOption(option);
+            
 
             myChart.on('legendselectchanged', function (obj) {
                 var selected = {};
@@ -198,3 +199,7 @@
 </body>
 
 </html>
+
+
+
+

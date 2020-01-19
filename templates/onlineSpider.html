@@ -8,6 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title> - 论坛</title>
+
     <meta name="keywords" content="">
     <meta name="description" content="">
 
@@ -18,11 +19,14 @@
 
     <link href="{% static 'css/animate.css' %}" rel="stylesheet">
     <link href="{% static 'css/style.css' %}" rel="stylesheet">
+    <!-- addKeyWords添加关键词样式 -->
+    <link rel="stylesheet" href="{% static 'css/addKeyWords.css' %}">
     <link href="{% static 'css/fontawesome-webfont.woff' %}" rel="stylesheet">
 
 </head>
 
 <!-- 新加文件 -->
+
 <body class="gray-bg">
     <div class="row">
         <div class="wrapper wrapper-content animated fadeInRight">
@@ -34,51 +38,59 @@
                             <div class="input-group input-group-sm" style="position: relative;">
                                 <span class="input-group-addon">请输入关键字、页码、时间</span>
 
-                              <!-- 换搜索框 要爬取到百度的关键字-->
-                                <input type="text" placeholder="请输入您需搜索要的内容 …" class="form-control" id="kw"/>
-                               <!-- <select type="text" class="form-control" id="kw"> -->
-                                  <!-- <option value="Java开发">Java开发</option>
-                                  <option value="UI设计师">UI设计师</option>
-                                  <option value="Web前端">Web前端</option> -->
-                               <!-- </select> -->
-                                <input type="text" value="76" class="form-control" id="page"/>
+                                <!-- 换搜索框 要爬取到百度的关键字-->
+                                <input type="text" placeholder="请输入您需搜索的内容 …" autocomplete="off" class="form-control" id="kw" />
+
+                                <!-- 添加关键词 -->
+                                <input type="text" class="form-control" name="staticPath" value="华制智能" id="staticPath2" style="display: none;"/>
+                                <span class="words-split"></span>
+
+                                <!-- 页码 -->
+                                <input type="text" value="76" class="form-control" id="page" />
 
                                 <!--日历-->
-                                <input type="text" name="reservation" id="reservation" class="form-control" />
-
+                                <input type="text" name="reservation" id="reservation" class="form-control"
+                                    autocomplete="off" placeholder="请选择日期" />
+                                
                                 <button type="button" class="form-control" id="startSpide">开始</button>
                                 <button type="button" class="form-control" id="downLoad" style="width:100px;height:50px;position: absolute;top:91px;right:27px;display: none;">下载</button>
+                            
                             </div>
 
                         </div>
 
                         <!--<div class="ibox-content forum-container" style="height:100%;overflow: scroll;">-->
-                        <iframe id="mainIframe" name="mainIframe" class="ibox-content forum-container" src="" frameborder="0" style="overflow: scroll;width: 100%;height: 500px;">
+                        <iframe id="mainIframe" name="mainIframe" class="ibox-content forum-container" src=""
+                            frameborder="0" style="overflow: scroll;width: 100%;height: 500px;">
                             <!--<pre style="height:500px;">-->
 
                             <!--</pre>-->
                         </iframe>
                         <!--</div>-->
+
+                       
                     </div>
                 </div>
             </div>
         </div>
     </div>
     <div class="modal inmodal" id="myModal2" tabindex="-1" role="dialog" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content animated flipInY">
-                    <div class="modal-header">
-                        <h4 class="modal-title">正在爬取...</h4>
-                    </div>
-                    <div class="modal-body" style="position: relative;height:300px;">
-                         <img  width="200" height="125"  src="{% static 'img/loading.gif' %}" style="position:absolute;left:0;right: 0;top: 0;bottom: 0;margin: auto;"></img>
-                    </div>
-                    <div class="modal-footer">
+        <div class="modal-dialog">
+            <div class="modal-content animated flipInY">
+                <div class="modal-header">
+                    <h4 class="modal-title">正在爬取...</h4>
+                </div>
+                <div class="modal-body" style="position: relative;height:300px;">
+                    <img width="200" height="125" src="{% static 'img/loading.gif' %}" style="position:absolute;left:0;right: 0;top: 0;bottom: 0;margin: auto;"></img>
+                </div>
+                <div class="modal-footer">
 
-                    </div>
                 </div>
             </div>
+        </div>
     </div>
+
+     
 
     <!-- 全局js -->
     <script src="{% static 'js/jquery.min.js' %}"></script>
@@ -92,107 +104,138 @@
 
 
     <script>
-            function getDay(day) {          // 获取年月日
-                var today = new Date();
-                var targetday_milliseconds = today.getTime() + 1000 * 60 * 60 * 24 * day;
-                today.setTime(targetday_milliseconds); // 注意，这行是关键代码
-                var tYear = today.getFullYear();
-                var tMonth = today.getMonth();
-                var tDate = today.getDate();
-                tMonth = doHandleMonth(tMonth + 1);
-                tDate = doHandleMonth(tDate);
-                console.log(tYear + "-" + tMonth + "-" + tDate)
-                return tYear + "-" + tMonth + "-" + tDate +  "-" +  tYear + "-" + tMonth + "-" + tDate;
+
+        // 添加固定关键词
+        var WS = function (opt) {
+            var regexp = opt.regexp || /\S/,
+                el = $(opt.el),
+                list = el.val().split(','),
+                holder = $('<span class="words-split"></span>'),
+                add = $('<a href="javascript:void(0)" class="words-split-add">+</a>');
+            for (var i = 0; i < list.length; i++) {
+                holder.append($('<a href="javascript:void(0)" class="fm-button">' + list[i] + '<em> </em></a>'));
             }
-            function doHandleMonth(month) {  // 月份处理
-                var m = month;
-                if (month.toString().length == 1) {
-                    m = "0" + month;
+            el.hide().after(holder);
+            holder.after(add);
+            holder.on('click', 'a>em', function () {	//刪除
+                $(this).parent().remove();
+                el.val(holder.text().match(/\S+/g).join(','))
+            });
+            add.on('click', function () {				//添加预处理
+                $(this).hide();
+                holder.append($('<span class="lbl-input" contenteditable="true"/>'))
+            });
+            holder.on('blur', '.lbl-input', function () {	//验证添加字段
+                var t = $(this), v = t.text();
+                if (regexp.test(v)) {
+                    t.remove();
+                    add.show();
+                    holder.append($('<a href="javascript:void(0)" class="fm-button">' + v + '<em> </em></a>'));
+                    el.val(holder.text().match(/\S+/g).join(','))
                 }
-                return m;
-            }
+                else if (!v) {
+                    t.remove();
+                    add.show();
+                }
+            });
+            holder.on('keydown', '.lbl-input', function (e) {
+                var t = $(this), v = t.text();
+                switch (e.keyCode) {
+                    case 13:
+                    case 27: $(this).trigger('blur');
+                }
+            });
+        }
+        WS({ el: '#staticPath2' });  
 
-            $('#reservation').daterangepicker(null, function (start, end, label) {
-                console.log(start.toISOString(), end.toISOString(), label);
-            }).val(getDay(0));
 
-            $("#startSpide").click(function(event){
-                console.log("开始爬取", $("#kw").val() )
-                var str = $("#reservation").val();
-                var strArr = str.split("-");
-                var firstTime = strArr[0] + "-" + strArr[1] + "-" + strArr[2];
-                var secondTime = strArr[3] + "-" + strArr[4] + "-" + strArr[5];
-                firstTimeStr=firstTime.replace(/\s+/g,"");   //js去掉右空格
-                secondTimeStr=secondTime.replace(/\s+/g,"");
-                 $("#myModal2").modal({
-                    backdrop: "static", // 相当于data-backdrop
-                    keyboard: false, // 相当于data-keyboard
-                    show: true  // 相当于data-show
-                });
-                $.ajax({
-                    async : true,    //表示请求是否异步处理
-                    type : "get",    //请求类型
-                    url : "/job/onlineSpider",//请求的 URL地址
-                    dataType : "json",//返回的数据类型
-                    data:{"kw":$("#kw").val(),"pn": $("#page").val(),"timeFrom": firstTimeStr,"timeTo": secondTimeStr},
-                    success: function (datas){
-                        console.log(datas)
-                        if(datas.msg=="success"){
-                            document.getElementById("mainIframe").src = "/static/" + datas.filename;
-                            $('#myModal2').modal('hide');
-                            $("#downLoad").show();
-                        }
-                    },
-                    error:function (data) {
-                        console.log(data)
+        // 日期
+        $('#reservation').daterangepicker(null, function (start, end, label) { }).val("");
+
+
+        // 开始爬取
+        $("#startSpide").click(function (event) {
+            console.log("开始爬取", $("#kw").val())
+            var str = $("#reservation").val()
+            var strArr = str.split("-")
+            var firstTime = strArr[0] + "-" + strArr[1] + "-" + strArr[2];
+            var secondTime = strArr[3] + "-" + strArr[4] + "-" + strArr[5];
+            firstTimeStr = firstTime.replace(/\s+/g, "");   //js去掉右空格
+            secondTimeStr = secondTime.replace(/\s+/g, "");
+            $("#myModal2").modal({
+                backdrop: "static", // 相当于data-backdrop
+                keyboard: false, // 相当于data-keyboard
+                show: true  // 相当于data-show
+            });
+            $.ajax({
+                async: true,    //表示请求是否异步处理
+                type: "get",    //请求类型
+                url: "/job/onlineSpider",//请求的 URL地址
+                dataType: "json",//返回的数据类型
+                data: { "kw": $("#kw").val(), "pn": $("#page").val(), "timeFrom": firstTimeStr, "timeTo": secondTimeStr },
+                success: function (datas) {
+                    console.log(datas)
+                    if (datas.msg == "success") {
+                        // 把搜索结果写入缓存 ， 用在统计图传参
+                        var searchValue = $("#kw").val();
+                        localStorage.setItem("searchValue", searchValue);
+                        document.getElementById("mainIframe").src = "/static/" + datas.filename;
+                        $('#myModal2').modal('hide');
+                        $("#downLoad").show();
                     }
-                });
+                },
+                error: function (data) {
+                    console.log(data)
+                }
             });
+        });
 
-            $("#downLoad").click(function(){
-               window.downloadFile(document.getElementById("mainIframe").src);
-            });
+        $("#downLoad").click(function () {
+            window.downloadFile(document.getElementById("mainIframe").src);
+        });
 
+        // 文件下载
         window.downloadFile = function (sUrl) {
 
-    //iOS devices do not support downloading. We have to inform user about this.
-    if (/(iP)/g.test(navigator.userAgent)) {
-        alert('Your device does not support files downloading. Please try again in desktop browser.');
-        return false;
-    }
+            //iOS devices do not support downloading. We have to inform user about this.
+            if (/(iP)/g.test(navigator.userAgent)) {
+                alert('Your device does not support files downloading. Please try again in desktop browser.');
+                return false;
+            }
 
-    //If in Chrome or Safari - download via virtual link click
-    if (window.downloadFile.isChrome || window.downloadFile.isSafari) {
-        //Creating new link node.
-        var link = document.createElement('a');
-        link.href = sUrl;
+            //If in Chrome or Safari - download via virtual link click
+            if (window.downloadFile.isChrome || window.downloadFile.isSafari) {
+                //Creating new link node.
+                var link = document.createElement('a');
+                link.href = sUrl;
 
-        if (link.download !== undefined) {
-            //Set HTML5 download attribute. This will prevent file from opening if supported.
-            var fileName = sUrl.substring(sUrl.lastIndexOf('/') + 1, sUrl.length);
-            link.download = fileName;
-        }
+                if (link.download !== undefined) {
+                    //Set HTML5 download attribute. This will prevent file from opening if supported.
+                    var fileName = sUrl.substring(sUrl.lastIndexOf('/') + 1, sUrl.length);
+                    link.download = fileName;
+                }
 
-        //Dispatching click event.
-        if (document.createEvent) {
-            var e = document.createEvent('MouseEvents');
-            e.initEvent('click', true, true);
-            link.dispatchEvent(e);
+                //Dispatching click event.
+                if (document.createEvent) {
+                    var e = document.createEvent('MouseEvents');
+                    e.initEvent('click', true, true);
+                    link.dispatchEvent(e);
+                    return true;
+                }
+            }
+
+            // Force file download (whether supported by server).
+            if (sUrl.indexOf('?') === -1) {
+                sUrl += '?download';
+            }
+
+            window.open(sUrl, '_self');
             return true;
         }
-    }
 
-    // Force file download (whether supported by server).
-    if (sUrl.indexOf('?') === -1) {
-        sUrl += '?download';
-    }
-
-    window.open(sUrl, '_self');
-    return true;
-}
-
-window.downloadFile.isChrome = navigator.userAgent.toLowerCase().indexOf('chrome') > -1;
-window.downloadFile.isSafari = navigator.userAgent.toLowerCase().indexOf('safari') > -1;
+        window.downloadFile.isChrome = navigator.userAgent.toLowerCase().indexOf('chrome') > -1;
+        window.downloadFile.isSafari = navigator.userAgent.toLowerCase().indexOf('safari') > -1;
     </script>
 </body>
+
 </html>

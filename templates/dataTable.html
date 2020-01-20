@@ -28,7 +28,7 @@
         <!-- Panel Other -->
         <div class="ibox float-e-margins">
             <div class="ibox-title">
-                <h5>招聘信息</h5>
+                <h5>搜索信息</h5>
                 <!-- <div class="ibox-tools">
                     <a class="collapse-link">
                         <i class="fa fa-chevron-up"></i>
@@ -72,8 +72,10 @@
                                             <select type="text" id="source"
                                                    class="form-control">
                                                 <option value="">来源</option>
+                                                <option value="腾讯新闻">腾讯新闻</option>
                                                 <option value="新浪">新浪</option>
-                                                <option value="36氪">36氪</option>
+                                                <option value="搜狐">搜狐</option>
+                                                <option value="">不限</option>
                                             </select>
                                         </div>
                                         <div class="form-group form-group-sm">
@@ -189,11 +191,15 @@
 	                }],
 		          queryParams : function (params) {
                     var str = $("#reservation").val();
-                    var strArr = str.split("-");
-                    var firstTime = strArr[0] + "-" + strArr[1] + "-" + strArr[2];
-                    var secondTime = strArr[3] + "-" + strArr[4] + "-" + strArr[5];
-                    firstTimeStr=firstTime.replace(/\s+/g,"");   //js去掉右空格
-                    secondTimeStr=secondTime.replace(/\s+/g,"");
+                    var firstTimeStr = "空";
+                    var secondTimeStr = "空";
+                    if(str != "") {
+                        var strArr = str.split("-")
+                        var firstTime = strArr[0] + "-" + strArr[1] + "-" + strArr[2];
+                        var secondTime = strArr[3] + "-" + strArr[4] + "-" + strArr[5];
+                        firstTimeStr = firstTime.replace(/\s+/g, "");   //js去掉右空格
+                        secondTimeStr = secondTime.replace(/\s+/g, "");
+                    }
                     console.log(firstTimeStr, secondTimeStr)
 		            //这里的键的名字和控制器的变量名必须一直，这边改动，控制器也需要改成一样的
 		            var temp = {
@@ -225,32 +231,32 @@
        }
 
 
-       function checkCompany(numberId){
-                $.ajax({
-                    async : true,    //表示请求是否异步处理
-                    type : "get",    //请求类型
-                    url : "/job/companyInfo",//请求的 URL地址
-                    dataType : "json",//返回的数据类型
-                    data:{"numberId":numberId},
-                    success: function (datas){
-                        console.log(datas)
-                        document.getElementById("companyImg").src = datas[0].logo;
-                        document.getElementById("companyName").href = datas[0].website;
-                        document.getElementById("companyName").innerHTML  = datas[0].company;
-                        document.getElementById("companyIndu").innerHTML  = datas[0].industry;
-                        document.getElementById("companyScale").innerHTML  = datas[0].scale;
+    //    function checkCompany(numberId){
+    //             $.ajax({
+    //                 async : true,    //表示请求是否异步处理
+    //                 type : "get",    //请求类型
+    //                 url : "/job/companyInfo",//请求的 URL地址
+    //                 dataType : "json",//返回的数据类型
+    //                 data:{"numberId":numberId},
+    //                 success: function (datas){
+    //                     console.log(datas)
+    //                     document.getElementById("companyImg").src = datas[0].logo;
+    //                     document.getElementById("companyName").href = datas[0].website;
+    //                     document.getElementById("companyName").innerHTML  = datas[0].company;
+    //                     document.getElementById("companyIndu").innerHTML  = datas[0].industry;
+    //                     document.getElementById("companyScale").innerHTML  = datas[0].scale;
 
-                        $("#myModal2").modal({
-                            backdrop: "static", // 相当于data-backdrop
-                            keyboard: false, // 相当于data-keyboard
-                            show: true  // 相当于data-show
-                        });
-                    },
-                    error:function (data) {
+    //                     $("#myModal2").modal({
+    //                         backdrop: "static", // 相当于data-backdrop
+    //                         keyboard: false, // 相当于data-keyboard
+    //                         show: true  // 相当于data-show
+    //                     });
+    //                 },
+    //                 error:function (data) {
 
-                    }
-                });
-       }
+    //                 }
+    //             });
+    //    }
 
     </script>
 </body>

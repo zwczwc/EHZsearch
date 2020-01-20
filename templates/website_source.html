@@ -17,13 +17,20 @@
         var app = {};  //图的标题 可以赋值
         option = null;
         myChart.showLoading();
+
         jobTypeData = null
         cityData = null
+
+        var searchValueRel = localStorage.getItem("searchValue");
+        
         window.onresize = function () {
             myChart.resize();
         }
 
-        $.get('/job/getNewsInfo', function (avgWage) {
+        $.get('/getSourceChartByKeyword?kw=' + searchValueRel, function (avgWage) {
+            
+            console.log(avgWage)
+
             myChart.hideLoading();
             jobTypeData = avgWage;
 
@@ -36,6 +43,11 @@
                             show: true
                         }
                     }
+                },
+                title: {
+                    left: 'center',
+                    text: searchValueRel + '网站来源图',
+                    // textStyle:{color:'#23b7e5'}
                 },
                 toolbox: {
                     show: true,
@@ -66,13 +78,13 @@
                 xAxis: [
                     {
                         type: 'category',
-                        data: avgWage.names
+                        data: avgWage.source
                     }
                 ],
                 yAxis: [
                     {
                         type: 'value',
-                        name: '网站来源',
+                        // name: searchValueRel + '网站来源',
                         axisLabel: {
                             formatter: function (a) {
                                 a = +a;
@@ -80,7 +92,10 @@
                                     ? echarts.format.addCommas(+a / 1)
                                     : '';
                             }
-                        }
+                        },
+                        // 不出现小数点
+                        minInterval : 1,
+                        boundaryGap : [ 0, 0.1 ]
                     }
                 ],
                 dataZoom: [
@@ -98,7 +113,7 @@
                         show: true,
                         yAxisIndex: 0,
                         filterMode: 'empty',
-                        width: 30,
+                        width: 5,
                         height: '80%',
                         showDataShadow: false,
                         left: '93%'
@@ -108,7 +123,7 @@
                     {
                         name: '网站来源',
                         type: 'bar',
-                        data: avgWage.AvgWage
+                        data: avgWage.total
                     },
                     // {
                     //     name: '网站来源',
@@ -129,66 +144,66 @@
             };
 
             myChart.setOption(option);
-            
 
-            myChart.on('legendselectchanged', function (obj) {
-                var selected = {};
-                var category = "岗位";
-                if (obj.name == "岗位平均工资") {
-                    selected["岗位平均工资"] = true;
-                    selected["城市平均工资"] = false;
-                    category = "岗位";
 
-                } else if (obj.name == "城市平均工资") {
-                    selected["岗位平均工资"] = false;
-                    selected["城市平均工资"] = true;
-                    category = "城市";
-                }
+            // myChart.on('legendselectchanged', function (obj) {
+            //     var selected = {};
+            //     var category = "岗位";
+            //     if (obj.name == "岗位平均工资") {
+            //         selected["岗位平均工资"] = true;
+            //         selected["城市平均工资"] = false;
+            //         category = "岗位";
 
-                if (category == "岗位") {
-                    if (jobTypeData != null && typeof jobTypeData == "object") {
-                        option.series[0].data = jobTypeData.AvgWage;
-                        option.series[1].data = jobTypeData.AvgWage;
-                        option.xAxis[0].data = jobTypeData.names;
-                        option.legend.selected = selected;
-                        this.setOption(option)
-                        return;
-                    }
-                } else if (category == "城市") {
-                    if (cityData != null && typeof cityData == "object") {
-                        option.series[0].data = cityData.AvgWage;
-                        option.series[1].data = cityData.AvgWage;
-                        option.xAxis[0].data = cityData.names;
-                        option.legend.selected = selected;
-                        this.setOption(option)
-                        return;
-                    }
-                }
+            //     } else if (obj.name == "城市平均工资") {
+            //         selected["岗位平均工资"] = false;
+            //         selected["城市平均工资"] = true;
+            //         category = "城市";
+            //     }
 
-                $.ajax({
-                    async: false,    //表示请求是否异步处理
-                    type: "get",    //请求类型
-                    url: "/job/avgWage",//请求的 URL地址
-                    dataType: "json",//返回的数据类型
-                    data: { "category": category },
-                    success: function (datas) {
+            //     if (category == "岗位") {
+            //         if (jobTypeData != null && typeof jobTypeData == "object") {
+            //             option.series[0].data = jobTypeData.AvgWage;
+            //             option.series[1].data = jobTypeData.AvgWage;
+            //             option.xAxis[0].data = jobTypeData.names;
+            //             option.legend.selected = selected;
+            //             this.setOption(option)
+            //             return;
+            //         }
+            //     } else if (category == "城市") {
+            //         if (cityData != null && typeof cityData == "object") {
+            //             option.series[0].data = cityData.AvgWage;
+            //             option.series[1].data = cityData.AvgWage;
+            //             option.xAxis[0].data = cityData.names;
+            //             option.legend.selected = selected;
+            //             this.setOption(option)
+            //             return;
+            //         }
+            //     }
 
-                        option.series[0].data = datas.AvgWage;
-                        option.series[1].data = datas.AvgWage;
-                        option.xAxis[0].data = datas.names;
-                        if (category == "城市") {
-                            cityData = datas;
-                        }
-                    },
-                    error: function (data) {
+                // $.ajax({
+                //     async: false,    //表示请求是否异步处理
+                //     type: "get",    //请求类型
+                //     url: "/job/avgWage",//请求的 URL地址
+                //     dataType: "json",//返回的数据类型
+                //     data: { "category": category },
+                //     success: function (datas) {
 
-                    }
-                });
+                //         option.series[0].data = datas.AvgWage;
+                //         option.series[1].data = datas.AvgWage;
+                //         option.xAxis[0].data = datas.names;
+                //         if (category == "城市") {
+                //             cityData = datas;
+                //         }
+                //     },
+                //     error: function (data) {
 
-                option.legend.selected = selected;
-                this.setOption(option)
+                //     }
+                // });
 
-            });
+                // option.legend.selected = selected;
+                // this.setOption(option)
+
+            // });
 
 
         });

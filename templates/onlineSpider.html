@@ -39,10 +39,12 @@
                                 <span class="input-group-addon">请输入关键字、页码、时间</span>
 
                                 <!-- 换搜索框 要爬取到百度的关键字-->
-                                <input type="text" placeholder="请输入您需搜索的内容 …" autocomplete="off" class="form-control" id="kw" />
+                                <input type="text" placeholder="请输入您需搜索的内容 …" autocomplete="off" class="form-control"
+                                    id="kw" />
 
                                 <!-- 添加关键词 -->
-                                <input type="text" class="form-control" name="staticPath" value="华制智能" id="staticPath2" style="display: none;"/>
+                                <input type="text" class="form-control" name="staticPath" value="华制智能,制造" id="staticPath2"
+                                    style="display: none;" />
                                 <span class="words-split"></span>
 
                                 <!-- 页码 -->
@@ -51,24 +53,22 @@
                                 <!--日历-->
                                 <input type="text" name="reservation" id="reservation" class="form-control"
                                     autocomplete="off" placeholder="请选择日期" />
-                                
+
                                 <button type="button" class="form-control" id="startSpide">开始</button>
                                 <button type="button" class="form-control" id="downLoad" style="width:100px;height:50px;position: absolute;top:91px;right:27px;display: none;">下载</button>
-                            
+
                             </div>
 
                         </div>
 
-                        <!--<div class="ibox-content forum-container" style="height:100%;overflow: scroll;">-->
-                        <iframe id="mainIframe" name="mainIframe" class="ibox-content forum-container" src=""
-                            frameborder="0" style="overflow: scroll;width: 100%;height: 500px;">
-                            <!--<pre style="height:500px;">-->
+                        <div style="width:100%;height:500px;background:#fff">
+                            <!-- 放url连接-->
+                            <iframe id="contentIframe" src="" frameborder="0" style="overflow: scroll;width: 49%;height: 500px;float:left"></iframe>
 
-                            <!--</pre>-->
-                        </iframe>
-                        <!--</div>-->
+                            <!-- 放文本文件-->
+                            <iframe id="mainIframe" src="" frameborder="0" style="overflow: scroll;width: 49%;height: 500px;float:right"></iframe>
+                        </div>
 
-                       
                     </div>
                 </div>
             </div>
@@ -90,7 +90,7 @@
         </div>
     </div>
 
-     
+
 
     <!-- 全局js -->
     <script src="{% static 'js/jquery.min.js' %}"></script>
@@ -113,16 +113,16 @@
                 holder = $('<span class="words-split"></span>'),
                 add = $('<a href="javascript:void(0)" class="words-split-add">+</a>');
             for (var i = 0; i < list.length; i++) {
-                holder.append($('<a href="javascript:void(0)" class="fm-button">' + list[i] + '<em> </em></a>'));
+                holder.append($(`<a href="javascript:void(0)" class="fm-button"><span>` + list[i] + '</span> <em> </em></a>'));
             }
             el.hide().after(holder);
             holder.after(add);
             holder.on('click', 'a>em', function () {	//刪除
-                $(this).parent().remove();
+                $(this).parent().remove()
                 el.val(holder.text().match(/\S+/g).join(','))
             });
             add.on('click', function () {				//添加预处理
-                $(this).hide();
+                $(this).hide()
                 holder.append($('<span class="lbl-input" contenteditable="true"/>'))
             });
             holder.on('blur', '.lbl-input', function () {	//验证添加字段
@@ -130,23 +130,51 @@
                 if (regexp.test(v)) {
                     t.remove();
                     add.show();
-                    holder.append($('<a href="javascript:void(0)" class="fm-button">' + v + '<em> </em></a>'));
+                    holder.append($('<a href="javascript:void(0)" class="fm-button"><span>' + v + '</span><em> </em></a>'));
                     el.val(holder.text().match(/\S+/g).join(','))
+                    $()
                 }
                 else if (!v) {
                     t.remove();
                     add.show();
                 }
-            });
+            })
             holder.on('keydown', '.lbl-input', function (e) {
                 var t = $(this), v = t.text();
                 switch (e.keyCode) {
                     case 13:
                     case 27: $(this).trigger('blur');
                 }
-            });
+            })
         }
-        WS({ el: '#staticPath2' });  
+        WS({ el: '#staticPath2' })
+
+        // 点击关键词标签，放入搜索框
+        $(".words-split").on("click", "a span", function (e) {
+            $("#kw").val($(this).text())
+        })
+        
+        // 一开始的默认关键字写入后台
+        var objArr = $("#staticPath2").val().split(",")
+        console.log(objArr)
+        $.ajax({
+            async: true,    //表示请求是否异步处理
+            type: "post",    //请求类型
+            url: "/addKeywordByPost",//请求的URL地址
+            contentType: "application/json",
+            dataType: "json",//返回的数据类型
+            data: objArr,
+            success: function (datas) {
+                console.log(datas)
+                
+            },
+            error: function (data) {
+                console.log(data)
+            }
+        });
+
+        // 一开始读取后台关键字
+        // 点击开始时候对比从后台拿到的和修改后的关键字结果，删除的就del，新增的就add
 
 
         // 日期
@@ -156,12 +184,23 @@
         // 开始爬取
         $("#startSpide").click(function (event) {
             console.log("开始爬取", $("#kw").val())
+
+            $("#staticPath2").val()
+
+            if ($("#kw").val() == "") {
+                alert("请输入关键字")
+                return;
+            }
             var str = $("#reservation").val()
-            var strArr = str.split("-")
-            var firstTime = strArr[0] + "-" + strArr[1] + "-" + strArr[2];
-            var secondTime = strArr[3] + "-" + strArr[4] + "-" + strArr[5];
-            firstTimeStr = firstTime.replace(/\s+/g, "");   //js去掉右空格
-            secondTimeStr = secondTime.replace(/\s+/g, "");
+            var firstTimeStr = "空";
+            var secondTimeStr = "空";
+            if (str != "") {
+                var strArr = str.split("-")
+                var firstTime = strArr[0] + "-" + strArr[1] + "-" + strArr[2];
+                var secondTime = strArr[3] + "-" + strArr[4] + "-" + strArr[5];
+                firstTimeStr = firstTime.replace(/\s+/g, "");   //js去掉右空格
+                secondTimeStr = secondTime.replace(/\s+/g, "");
+            }
             $("#myModal2").modal({
                 backdrop: "static", // 相当于data-backdrop
                 keyboard: false, // 相当于data-keyboard
@@ -179,7 +218,11 @@
                         // 把搜索结果写入缓存 ， 用在统计图传参
                         var searchValue = $("#kw").val();
                         localStorage.setItem("searchValue", searchValue);
+
+                        // 文本和url    
+                        document.getElementById("contentIframe").src = datas.url;
                         document.getElementById("mainIframe").src = "/static/" + datas.filename;
+
                         $('#myModal2').modal('hide');
                         $("#downLoad").show();
                     }

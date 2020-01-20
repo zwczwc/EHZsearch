@@ -168,16 +168,16 @@ def getEducationAndExperienceOfCity(request):
     return HttpResponse(json.dumps(result), content_type="application/json")
 
 
-def addKeyword(request):
-    keyword = request.GET.get('kw', '')
-    keyword_info.objects.get_or_create(name=keyword)
-    return HttpResponse(json.dumps({'msg': 'success'}), content_type="application/json")
-
-
 def getKeyword(request):
     resQuery = keyword_info.objects.values_list('name', flat=True)
     res = {'data': list(resQuery)}
     return HttpResponse(json.dumps(res, ensure_ascii=False), content_type="application/json", charset='utf-8')
+
+
+def addKeyword(request):
+    keyword = request.GET.get('kw', '')
+    keyword_info.objects.get_or_create(name=keyword)
+    return HttpResponse(json.dumps({'msg': 'success'}), content_type="application/json")
 
 
 def deleteKeyword(request):
@@ -185,6 +185,22 @@ def deleteKeyword(request):
     keyword_info.objects.filter(name=keyword).delete()
     return HttpResponse(json.dumps({'msg': 'success'}), content_type="application/json")
 
+def addKeywordByPost(request):
+    json_result = json.loads(request.body)
+    keywordList = json_result['data']
+    for item in keywordList:
+       keyword_info.objects.get_or_create(name=str(item))
+
+    return HttpResponse(json.dumps({'msg': 'success'}), content_type="application/json")
+
+
+def deleteKeywordByPost(request):
+    json_result = json.loads(request.body)
+    keywordList = json_result['data']
+    for item in keywordList:
+        keyword_info.objects.filter(name=str(item)).delete()
+
+    return HttpResponse(json.dumps({'msg': 'success'}), content_type="application/json")
 
 def Redirect(url):
     res = requests.get(url, timeout=10)
@@ -332,7 +348,7 @@ def baiduNewsSpider(request):
 def getTrendByKeyword(request):
     kw = request.GET.get("kw", '华制智能')
     # 多次结果中筛选
-    #resQuery = news_info.objects.filter(Q(title__icontains=kw)).values('time').order_by('time')
+    # resQuery = news_info.objects.filter(Q(title__icontains=kw)).values('time').order_by('time')
     # 只针对一次
     resQuery = news_info.objects.all().values('time').order_by('time')
     timeDict = {}

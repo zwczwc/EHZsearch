@@ -37,6 +37,8 @@ urlpatterns = [
     path('getKeyword', views.getKeyword),
     path('addKeyword', views.addKeyword),
     path('deleteKeyword',views.deleteKeyword),
+    path('addKeywordByPost', views.addKeywordByPost),
+    path('deleteKeywordByPost',views.deleteKeywordByPost),
 
 ]
 

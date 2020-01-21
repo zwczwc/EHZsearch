@@ -156,6 +156,7 @@
         
         // 一开始的默认关键字写入后台
         var objArr = $("#staticPath2").val().split(",")
+        var json_object= {data:objArr}
         console.log(objArr)
         $.ajax({
             async: true,    //表示请求是否异步处理
@@ -163,7 +164,7 @@
             url: "/addKeywordByPost",//请求的URL地址
             contentType: "application/json",
             dataType: "json",//返回的数据类型
-            data: objArr,
+            data: JSON.stringify(json_object),
             success: function (datas) {
                 console.log(datas)
                 
@@ -172,6 +173,8 @@
                 console.log(data)
             }
         });
+
+
 
         // 一开始读取后台关键字
         // 点击开始时候对比从后台拿到的和修改后的关键字结果，删除的就del，新增的就add

@@ -185,11 +185,14 @@ def deleteKeyword(request):
     keyword_info.objects.filter(name=keyword).delete()
     return HttpResponse(json.dumps({'msg': 'success'}), content_type="application/json")
 
+
 def addKeywordByPost(request):
+
     json_result = json.loads(request.body)
+
     keywordList = json_result['data']
     for item in keywordList:
-       keyword_info.objects.get_or_create(name=str(item))
+        keyword_info.objects.get_or_create(name=str(item))
 
     return HttpResponse(json.dumps({'msg': 'success'}), content_type="application/json")
 
@@ -199,6 +202,15 @@ def deleteKeywordByPost(request):
     keywordList = json_result['data']
     for item in keywordList:
         keyword_info.objects.filter(name=str(item)).delete()
+
+    return HttpResponse(json.dumps({'msg': 'success'}), content_type="application/json")
+
+def updateKeywordByPost(request):
+    json_result = json.loads(request.body)
+    oldKeywordList = json_result['oldkw']
+    newKeywordList = json_result['newkw']
+    for (olditem,newitem) in zip(oldKeywordList,newKeywordList):
+        keyword_info.objects.filter(name=str(olditem)).update(name=str(newitem))
 
     return HttpResponse(json.dumps({'msg': 'success'}), content_type="application/json")
 
@@ -343,6 +355,21 @@ def baiduNewsSpider(request):
 
     # print(baidu_search(kw, pn))
 
+def weiboSpider(request):
+    kw = request.GET.get("kw", '华制智能')
+    pn = request.GET.get("pn", '1')
+    timeFrom = request.GET.get("timeFrom", '空')
+    timeTo = request.GET.get("timeTo", '空')
+    if (timeFrom != '空'):
+        timeFrom += ' 00:00:00'
+        timeTo += ' 23:59:59'
+    # try:
+    res = weiboSearch(kw, pn, timeFrom, timeTo)
+    res['msg'] = 'success'
+    return HttpResponse(json.dumps(res), content_type="application/json")
+
+def weiboSearch(kw, pn, timeFrom, timeTo):
+    return HttpResponse(json.dumps({'msg':"success"}), content_type="application/json")
 
 # 关键词趋势变化图
 def getTrendByKeyword(request):

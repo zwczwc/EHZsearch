@@ -189,27 +189,16 @@
         }
        
         
-        // 删除关键字 点击开始爬取的时候对比获取的关键词
-        // $.ajax({
-        //     // async: true,    //表示请求是否异步处理
-        //     type: "post",    //请求类型
-        //     url: "/deleteKeyword",//请求的URL地址
-        //     // contentType: "application/json",
-        //     dataType: "json",//返回的数据类型
-        //     // data: {objArr:objArr},
-        //     data: JSON.stringify(json_object),
-        //     success: function (datas) {
-        //         console.log(datas)
-        //     },
-        //     error: function (data) {
-        //         console.log(data)
-        //     }
-        // })
-
-
         // 日期
         $('#reservation').daterangepicker(null, function (start, end, label) {}).val("");    
               
+
+        // 判断两个数组是否为包含关系
+        function includes(arr1, arr2) {
+            return arr2.every(val => arr1.includes(val));
+        }      
+        
+
         // 开始爬取
         $("#startSpide").click(function (event) {
 
@@ -224,7 +213,9 @@
 
                 // 外层换个方法在两个数组中找不一样的
 
-                if(objArr1.length > objArr2.length) {
+                if(objArr1.length > objArr2.length && includes(objArr1, objArr2)) { //包含 走新增
+                    // 如果包含 走新增 ；  不包含  走更新
+                    
                     let newArr = objArr1.filter(item => !objArr2.some(ele => ele===item));
                     console.log(newArr)
                     // var objArr = $("#staticPath2").val().split(",")
@@ -245,8 +236,59 @@
                         }
                     });
                 }
+                if(objArr1.length > objArr2.length && !includes(objArr1, objArr2)) { //不包含 走删除再走添加
+                    let newArr = objArr1.filter(item => !objArr2.some(ele => ele===item));
+                    let oS1 = new Set(objArr1);     // 先去重
+                    let oS2 = new Set(objArr2);   
+                    let newoArr = [...oS1].filter( ele => !oS2.has(ele) );    //即return oS2.has(ele)
+                    let totalArr = [...new Set([...oS1, ...oS2])]
+                    console.log(newoArr, objArr1, totalArr);  //(2) [2, 3]
+                    // 从objArr1, totalArr找到差集，就是要删除得部分
+
+                    let oSobjArr1 = new Set(objArr1);     // 先去重
+                    let oS2objArr2 = new Set(totalArr); 
+                    let newArr1 = [...oS2objArr2].filter( (ele) => {
+                        return !oSobjArr1.has(ele);
+                    })
+                    var delArr = [...newArr1];
+                    console.log(newoArr, delArr)
+                    var newDelArr= {data:delArr}
+                    var newAddArr = {data:newoArr}
+                    // 先删除 
+                    $.ajax({
+                        // async: true,    //表示请求是否异步处理
+                        type: "post",    //请求类型
+                        url: "/deleteKeywordByPost",//请求的URL地址
+                        dataType: "json",//返回的数据类型
+                        data: JSON.stringify(newDelArr),   // 转为字符串
+                        success: function (datas) {
+                            console.log(datas)
+                            // 再添加
+                            $.ajax({
+                                // async: true,    //表示请求是否异步处理
+                                type: "post",    //请求类型
+                                url: "/addKeywordByPost",//请求的URL地址
+                                // contentType: "application/json",
+                                dataType: "json",//返回的数据类型
+                                // data: {data:newArr},
+                                data: JSON.stringify(newAddArr),   //转为字符串  
+                                success: function (datas) {
+                                    console.log(datas)
+                                },
+                                error: function (data) {
+                                    console.log(data)
+                                }
+                            });
+                        }
+                    });
+
+
+                }
+
+
                 // 删除操作
-                if (objArr1.length < objArr2.length) {
+                if (objArr1.length < objArr2.length && includes(objArr2, objArr1)) {
+                    // console.log(includes(objArr2, objArr1))
                     var newObjArr = ""
                     var oS1 = new Set(objArr1);     // 先去重
                     var oS2 = new Set(objArr2);
@@ -258,20 +300,74 @@
                     }
                     console.log(newObjArr)
                     var newObjArr= {data:newObjArr}
-                    // $.ajax({
-                    //     // async: true,    //表示请求是否异步处理
-                    //     type: "post",    //请求类型
-                    //     url: "/deleteKeywordByPost",//请求的URL地址
-                    //     dataType: "json",//返回的数据类型
-                    //     data: JSON.stringify(newObjArr),   // 转为字符串
-                    //     success: function (datas) {
-                    //         console.log(datas)
-                    //     }
-                    // });
+                    $.ajax({
+                        // async: true,    //表示请求是否异步处理
+                        type: "post",    //请求类型
+                        url: "/deleteKeywordByPost",//请求的URL地址
+                        dataType: "json",//返回的数据类型
+                        data: JSON.stringify(newObjArr),   // 转为字符串
+                        success: function (datas) {
+                            console.log(datas)
+                        }
+                    });
+                }
+                if (objArr1.length < objArr2.length && !includes(objArr2, objArr1)) {
+                    console.log(objArr2, objArr1)
+                    // var newObjArr = ""
+                    var oS1qwe = new Set(objArr1);     // 先去重
+                    var oS2yert = new Set(objArr2);
+                    var delNewArroS1qwe = [...oS2yert].filter( ele => !oS1qwe.has(ele) )
+                    var totalasdfwe = [...oS1qwe,...oS2yert];
+                    var totalasdf = new Set([...oS1qwe,...oS2yert]);
+                    console.log(oS2yert, totalasdf)
+                    var addgrhe = totalasdfwe.filter( ele => !oS2yert.has(ele) )
+
+                    console.log(delNewArroS1qwe, addgrhe)
+
+                    var shrtqw = {data:delNewArroS1qwe};
+                    var wrrete = {data:addgrhe}
+
+                    // 先删除
+                    $.ajax({
+                        // async: true,    //表示请求是否异步处理
+                        type: "post",    //请求类型
+                        url: "/deleteKeywordByPost",//请求的URL地址
+                        dataType: "json",//返回的数据类型
+                        data: JSON.stringify(shrtqw),   // 转为字符串
+                        success: function (datas) {
+                            // 再添加
+                            $.ajax({
+                                // async: true,    //表示请求是否异步处理
+                                type: "post",    //请求类型
+                                url: "/addKeywordByPost",//请求的URL地址
+                                // contentType: "application/json",
+                                dataType: "json",//返回的数据类型
+                                // data: {data:newArr},
+                                data: JSON.stringify(wrrete),   // 转为字符串
+                                success: function (datas) {
+                                    console.log(datas)
+                                },
+                                error: function (data) {
+                                    console.log(data)
+                                }
+                            });
+                        }
+                    });
                 }
                 // 更新操作
                 if(objArr1.length == objArr2.length) {
-                    
+                    var newObjArr= {oldkw:objArr2, newkw: objArr1}
+                    console.log(newObjArr)
+                    $.ajax({
+                        async: true,    //表示请求是否异步处理
+                        type: "post",    //请求类型
+                        url: "/updateKeywordByPost",//请求的URL地址
+                        dataType: "json",//返回的数据类型
+                        data: JSON.stringify(newObjArr),   // 转为字符串
+                        success: function (datas) {
+                            console.log(datas)
+                        }
+                    });
                 }
             // }
 
@@ -296,31 +392,31 @@
                 keyboard: false, // 相当于data-keyboard
                 show: true  // 相当于data-show
             });
-            // $.ajax({
-            //     async: true,    //表示请求是否异步处理
-            //     type: "get",    //请求类型
-            //     url: "/job/onlineSpider",//请求的 URL地址
-            //     dataType: "json",//返回的数据类型
-            //     data: { "kw": $("#kw").val(), "pn": $("#page").val(), "timeFrom": firstTimeStr, "timeTo": secondTimeStr },
-            //     success: function (datas) {
-            //         console.log(datas)
-            //         if (datas.msg == "success") {
-            //             // 把搜索结果写入缓存 ， 用在统计图传参
-            //             var searchValue = $("#kw").val();
-            //             localStorage.setItem("searchValue", searchValue);
+            $.ajax({
+                async: true,    //表示请求是否异步处理
+                type: "get",    //请求类型
+                url: "/job/onlineSpider",//请求的 URL地址
+                dataType: "json",//返回的数据类型
+                data: { "kw": $("#kw").val(), "pn": $("#page").val(), "timeFrom": firstTimeStr, "timeTo": secondTimeStr },
+                success: function (datas) {
+                    console.log(datas)
+                    if (datas.msg == "success") {
+                        // 把搜索结果写入缓存 ， 用在统计图传参
+                        var searchValue = $("#kw").val();
+                        localStorage.setItem("searchValue", searchValue);
 
-            //             // 文本和url    
-            //             document.getElementById("contentIframe").src = datas.url;
-            //             document.getElementById("mainIframe").src = "/static/" + datas.filename;
+                        // 文本和url    
+                        document.getElementById("contentIframe").src = datas.url;
+                        document.getElementById("mainIframe").src = "/static/" + datas.filename;
 
-            //             $('#myModal2').modal('hide');
-            //             $("#downLoad").show();
-            //         }
-            //     },
-            //     error: function (data) {
-            //         console.log(data)
-            //     }
-            // });
+                        $('#myModal2').modal('hide');
+                        $("#downLoad").show();
+                    }
+                },
+                error: function (data) {
+                    console.log(data)
+                }
+            });
         });
 
         $("#downLoad").click(function () {

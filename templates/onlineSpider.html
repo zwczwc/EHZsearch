@@ -23,6 +23,16 @@
     <link rel="stylesheet" href="{% static 'css/addKeyWords.css' %}">
     <link href="{% static 'css/fontawesome-webfont.woff' %}" rel="stylesheet">
 
+    <style>
+        .input-group-sm>.form-control, .input-group-sm>.input-group-addon, .input-group-sm>.input-group-btn>.btn {
+            height: 42px;
+            margin: 6px 0;
+        }
+        .input-group-addon {
+            border: none;
+        }
+    </style>
+
 </head>
 
 <!-- 新加文件 -->
@@ -39,11 +49,11 @@
                                 <span class="input-group-addon">请输入关键字、页码、时间</span>
 
                                 <!-- 换搜索框 要爬取到百度的关键字-->
-                                <input type="text" placeholder="请输入您需搜索的内容 …" autocomplete="off" class="form-control"
+                                 <input type="text" placeholder="请输入您需搜索的内容 …" autocomplete="off" class="form-control"
                                     id="kw" />
 
                                 <!-- 添加关键词 -->
-                                <input type="text" class="form-control" name="staticPath" value="华制智能,制造" id="staticPath2"
+                               <input type="text" class="form-control" name="staticPath" value="" id="staticPath2"
                                     style="display: none;" />
                                 <span class="words-split"></span>
 
@@ -105,6 +115,37 @@
 
     <script>
 
+        // 一开始读取后台关键字
+        var keyInitialValue = ""
+        $.ajax({
+            async: true,    //表示请求是否异步处理
+            type: "get",    //请求类型
+            url: "/getKeyword",//请求的 URL地址
+            dataType: "json",//返回的数据类型
+            success: function (datas) {
+                console.log(datas.data)
+                // 写入页面
+                var str = ""
+                datas.data.forEach(item => {
+                    str += item + "," ;
+                    $("#words-split a span").html(item);
+                })
+                if (str.length > 0) {//去掉最后一个逗号
+                    str = str.substr(0,str.length - 1)
+                    keyInitialValue = str;    // 存在外部变量，新增和删除对比时有用
+                }
+                $("#staticPath2").val(str)
+                
+                // 添加固定关键词
+                WS({ el: '#staticPath2' })  
+
+                // 点击关键词标签，放入搜索框
+                $(".words-split").on("click", "a span", function (e) {
+                    $("#kw").val($(this).text())
+                })
+            }
+        });
+
         // 添加固定关键词
         var WS = function (opt) {
             var regexp = opt.regexp || /\S/,
@@ -132,7 +173,6 @@
                     add.show();
                     holder.append($('<a href="javascript:void(0)" class="fm-button"><span>' + v + '</span><em> </em></a>'));
                     el.val(holder.text().match(/\S+/g).join(','))
-                    $()
                 }
                 else if (!v) {
                     t.remove();
@@ -147,45 +187,95 @@
                 }
             })
         }
-        WS({ el: '#staticPath2' })
-
-        // 点击关键词标签，放入搜索框
-        $(".words-split").on("click", "a span", function (e) {
-            $("#kw").val($(this).text())
-        })
+       
         
-        // 一开始的默认关键字写入后台
-        var objArr = $("#staticPath2").val().split(",")
-        console.log(objArr)
-        $.ajax({
-            async: true,    //表示请求是否异步处理
-            type: "post",    //请求类型
-            url: "/addKeywordByPost",//请求的URL地址
-            contentType: "application/json",
-            dataType: "json",//返回的数据类型
-            data: objArr,
-            success: function (datas) {
-                console.log(datas)
-                
-            },
-            error: function (data) {
-                console.log(data)
-            }
-        });
-
-        // 一开始读取后台关键字
-        // 点击开始时候对比从后台拿到的和修改后的关键字结果，删除的就del，新增的就add
+        // 删除关键字 点击开始爬取的时候对比获取的关键词
+        // $.ajax({
+        //     // async: true,    //表示请求是否异步处理
+        //     type: "post",    //请求类型
+        //     url: "/deleteKeyword",//请求的URL地址
+        //     // contentType: "application/json",
+        //     dataType: "json",//返回的数据类型
+        //     // data: {objArr:objArr},
+        //     data: JSON.stringify(json_object),
+        //     success: function (datas) {
+        //         console.log(datas)
+        //     },
+        //     error: function (data) {
+        //         console.log(data)
+        //     }
+        // })
 
 
         // 日期
-        $('#reservation').daterangepicker(null, function (start, end, label) { }).val("");
-
-
+        $('#reservation').daterangepicker(null, function (start, end, label) {}).val("");    
+              
         // 开始爬取
         $("#startSpide").click(function (event) {
-            console.log("开始爬取", $("#kw").val())
 
-            $("#staticPath2").val()
+            // 点击开始时候对比从后台拿到的和修改后的关键字结果，删除的就del，新增的就add
+            var objArr1 = $("#staticPath2").val().split(",");
+            var objArr2 = keyInitialValue.split(",");
+            console.log(keyInitialValue == $("#staticPath2").val())
+
+            // console.log(objArr1 !== objArr2)
+            // if(objArr1 !== objArr2) {
+                // 新的数组长度大于一开始获取的关键词数组长度 走新增post操作
+
+                // 外层换个方法在两个数组中找不一样的
+
+                if(objArr1.length > objArr2.length) {
+                    let newArr = objArr1.filter(item => !objArr2.some(ele => ele===item));
+                    console.log(newArr)
+                    // var objArr = $("#staticPath2").val().split(",")
+                    var json_object= {data:newArr}
+                    $.ajax({
+                        // async: true,    //表示请求是否异步处理
+                        type: "post",    //请求类型
+                        url: "/addKeywordByPost",//请求的URL地址
+                        // contentType: "application/json",
+                        dataType: "json",//返回的数据类型
+                        // data: {data:newArr},
+                        data: JSON.stringify(json_object),   // 转为字符串
+                        success: function (datas) {
+                            console.log(datas)
+                        },
+                        error: function (data) {
+                            console.log(data)
+                        }
+                    });
+                }
+                // 删除操作
+                if (objArr1.length < objArr2.length) {
+                    var newObjArr = ""
+                    var oS1 = new Set(objArr1);     // 先去重
+                    var oS2 = new Set(objArr2);
+                    var newArr = [...oS2].filter( ele => !oS1.has(ele) )
+                    newObjArr = newArr;
+                    // length为1并且span下没有a标签，表示最后一个也删除了, 获取删除的文本 拼成数组
+                    if($(".words-split a").length == 0) {
+                        newObjArr = newArr.concat(objArr1)
+                    }
+                    console.log(newObjArr)
+                    var newObjArr= {data:newObjArr}
+                    // $.ajax({
+                    //     // async: true,    //表示请求是否异步处理
+                    //     type: "post",    //请求类型
+                    //     url: "/deleteKeywordByPost",//请求的URL地址
+                    //     dataType: "json",//返回的数据类型
+                    //     data: JSON.stringify(newObjArr),   // 转为字符串
+                    //     success: function (datas) {
+                    //         console.log(datas)
+                    //     }
+                    // });
+                }
+                // 更新操作
+                if(objArr1.length == objArr2.length) {
+                    
+                }
+            // }
+
+
 
             if ($("#kw").val() == "") {
                 alert("请输入关键字")
@@ -198,39 +288,39 @@
                 var strArr = str.split("-")
                 var firstTime = strArr[0] + "-" + strArr[1] + "-" + strArr[2];
                 var secondTime = strArr[3] + "-" + strArr[4] + "-" + strArr[5];
-                firstTimeStr = firstTime.replace(/\s+/g, "");   //js去掉右空格
+                firstTimeStr = firstTime.replace(/\s+/g, "");   //js去掉右空格 
                 secondTimeStr = secondTime.replace(/\s+/g, "");
-            }
-            $("#myModal2").modal({
+            }   
+            $("#myModal2").modal({  
                 backdrop: "static", // 相当于data-backdrop
                 keyboard: false, // 相当于data-keyboard
                 show: true  // 相当于data-show
             });
-            $.ajax({
-                async: true,    //表示请求是否异步处理
-                type: "get",    //请求类型
-                url: "/job/onlineSpider",//请求的 URL地址
-                dataType: "json",//返回的数据类型
-                data: { "kw": $("#kw").val(), "pn": $("#page").val(), "timeFrom": firstTimeStr, "timeTo": secondTimeStr },
-                success: function (datas) {
-                    console.log(datas)
-                    if (datas.msg == "success") {
-                        // 把搜索结果写入缓存 ， 用在统计图传参
-                        var searchValue = $("#kw").val();
-                        localStorage.setItem("searchValue", searchValue);
+            // $.ajax({
+            //     async: true,    //表示请求是否异步处理
+            //     type: "get",    //请求类型
+            //     url: "/job/onlineSpider",//请求的 URL地址
+            //     dataType: "json",//返回的数据类型
+            //     data: { "kw": $("#kw").val(), "pn": $("#page").val(), "timeFrom": firstTimeStr, "timeTo": secondTimeStr },
+            //     success: function (datas) {
+            //         console.log(datas)
+            //         if (datas.msg == "success") {
+            //             // 把搜索结果写入缓存 ， 用在统计图传参
+            //             var searchValue = $("#kw").val();
+            //             localStorage.setItem("searchValue", searchValue);
 
-                        // 文本和url    
-                        document.getElementById("contentIframe").src = datas.url;
-                        document.getElementById("mainIframe").src = "/static/" + datas.filename;
+            //             // 文本和url    
+            //             document.getElementById("contentIframe").src = datas.url;
+            //             document.getElementById("mainIframe").src = "/static/" + datas.filename;
 
-                        $('#myModal2').modal('hide');
-                        $("#downLoad").show();
-                    }
-                },
-                error: function (data) {
-                    console.log(data)
-                }
-            });
+            //             $('#myModal2').modal('hide');
+            //             $("#downLoad").show();
+            //         }
+            //     },
+            //     error: function (data) {
+            //         console.log(data)
+            //     }
+            // });
         });
 
         $("#downLoad").click(function () {

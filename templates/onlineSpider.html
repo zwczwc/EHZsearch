@@ -38,6 +38,7 @@
 <!-- 新加文件 -->
 
 <body class="gray-bg">
+    
     <div class="row">
         <div class="wrapper wrapper-content animated fadeInRight">
             <div class="row">
@@ -46,7 +47,11 @@
 
                         <div class="ibox-content m-b-sm border-bottom">
                             <div class="input-group input-group-sm" style="position: relative;">
-                                <span class="input-group-addon">请输入关键字、页码、时间</span>
+                                <span class="input-group-addon">
+                                    <img style="display:block;width:100%;" src="{% static 'img/baidu_Logo.jfif' %}"/>
+                                    <p style="margin:1em">请输入百度关键字、页码、日期</p>
+                                    
+                                </span>
 
                                 <!-- 换搜索框 要爬取到百度的关键字-->
                                  <input type="text" placeholder="请输入您需搜索的内容 …" autocomplete="off" class="form-control"
@@ -84,6 +89,7 @@
             </div>
         </div>
     </div>
+
     <div class="modal inmodal" id="myModal2" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content animated flipInY">
@@ -176,7 +182,7 @@
                 }
                 else if (!v) {
                     t.remove();
-                    add.show();
+                    add.show();   
                 }
             })
             holder.on('keydown', '.lbl-input', function (e) {
@@ -370,13 +376,14 @@
                     });
                 }
             // }
-
+                
 
 
             if ($("#kw").val() == "") {
                 alert("请输入关键字")
                 return;
             }
+
             var str = $("#reservation").val()
             var firstTimeStr = "空";
             var secondTimeStr = "空";

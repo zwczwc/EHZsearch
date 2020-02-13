@@ -651,6 +651,8 @@ body.canvas-menu.mini-navbar nav.navbar-static-side {
     padding: 10px 15px 10px 20px;
 }
 
+
+
 @media (max-width: 768px) {
     .top-navigation .navbar-header {
         display: block;
@@ -7936,3 +7938,7 @@ body.skin-3 {
     font-size: 0;
     background-color: #131e26;
 }
+
+
+
+

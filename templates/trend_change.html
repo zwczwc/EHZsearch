@@ -4,9 +4,39 @@
 
 <head>
     <meta charset="utf-8">
+    <style>
+        .searchEch {
+            position: absolute;
+            left: 20px;
+            top: 5px;
+            z-index: 1;
+        }
+        input, button {
+            border-radius: 5px;
+            font-size: 14px;
+            line-height: 25px;
+            border: 1px solid darkgrey;
+            outline: none;
+        }
+        input{
+            text-indent: 0.5em
+        }
+        button {
+            cursor: pointer
+        }
+        button:hover{
+            color: #fff;
+            background-color: #19a9d5
+        }
+
+    </style>
 </head>
 
 <body style="height: 100%; margin: 0">
+    <div class="searchEch">
+        <input type="text" id="inpVal" value="" placeholder="" autocomplete="off"/>
+        <button id="searchVal">查看</button>
+    </div>
     <div id="container" style="height: 100%"></div>
     <script src="{% static 'js/jquery.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/echarts.min.js' %}"></script>
@@ -16,7 +46,19 @@
         var myChart = echarts.init(dom);
 
         var searchWord = localStorage.getItem("searchValue");
-        console.log(searchWord)
+        $("#inpVal").attr("placeholder", searchWord)
+
+        var oinpVal = ""
+
+        $("#searchVal").click(function () {
+            oinpVal = $("#inpVal").val();
+            if (oinpVal != "") {
+                searchWord = oinpVal;
+                getTrendKeyword()
+            } else {
+                alert("请输入内容")
+            }
+        });
 
         var app = {};
         option = null;
@@ -28,170 +70,111 @@
             myChart.resize();
         }
 
+        function getTrendKeyword() {
+            $.get('/getTrendByKeyword?kw=' + searchWord, function (avgWage) {
 
-        $.get('/getTrendByKeyword?kw=' + searchWord, function (avgWage) {
+                console.log(searchWord, avgWage)
 
-            console.log(avgWage)
-            
-            myChart.hideLoading();
-            jobTypeData = avgWage;
+                myChart.hideLoading();
+                jobTypeData = avgWage;
 
-            option = {
-                tooltip: {
-                    trigger: 'axis',
-                    position: function (pt) {
-                        return [pt[0], '10%'];
-                    }
-                },
-                title: {
-                    left: 'center',
-                    text: searchWord + '趋势变化图',
-                    // textStyle:{color:'#23b7e5'}
-                },
-                toolbox: {
-                    feature: {
-                        dataZoom: {
-                            yAxisIndex: 'none'
-                        },
-                        restore: {},
-                        saveAsImage: {}
-                    }
-                },
-                xAxis: {
-                    type: 'category',
-                    boundaryGap: false,
-                    // data: ['8:00', '9:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00']
-                    //这个时间数据要从后台获取
-                    data: jobTypeData.time
-                },
-                yAxis: {
-                    //纵坐标y轴，根据series的data数据值动态的自适应
-                    type: 'value',
-                    boundaryGap: [0, '100%']
-                },
-                dataZoom: [{
-                    type: 'inside',
-                    //数据窗口范围的起始百分比,表示30%
-                    //数据窗口范围的结束百分比,表示70%
-                    start: 0,
-                    end: 100
-                    // startValue: dates[0],
-                    // endValue: dates[dates.length-1],
+                option = {
+                    tooltip: {
+                        trigger: 'axis',
+                        position: function (pt) {
+                            return [pt[0], '10%'];
+                        }
+                    },
+                    title: {
+                        left: 'center',
+                        text: searchWord + '趋势变化图',
+                        // textStyle:{color:'#23b7e5'}
+                    },
+                    toolbox: {
+                        feature: {
+                            dataZoom: {
+                                yAxisIndex: 'none'
+                            },
+                            restore: {},
+                            saveAsImage: {}
+                        }
+                    },
+                    xAxis: {
+                        type: 'category',
+                        boundaryGap: false,
+                        // data: ['8:00', '9:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00']
+                        //这个时间数据要从后台获取
+                        data: jobTypeData.time
+                    },
+                    yAxis: {
+                        //纵坐标y轴，根据series的data数据值动态的自适应
+                        type: 'value',
+                        boundaryGap: [0, '100%']
+                    },
+                    dataZoom: [{
+                        type: 'inside',
+                        //数据窗口范围的起始百分比,表示30%
+                        //数据窗口范围的结束百分比,表示70%
+                        start: 0,
+                        end: 100
+                        // startValue: dates[0],
+                        // endValue: dates[dates.length-1],
 
-                }, {
-                    start: 0,
-                    end: 100,
-                    // startValue: dates[0],
-                    // endValue: dates[dates.length-1],
-                    handleIcon: 'M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
-                    handleSize: '80%',
-                    handleStyle: {
-                        color: '#fff',
-                        shadowBlur: 3,
-                        shadowColor: 'rgba(0, 0, 0, 0.6)',
-                        shadowOffsetX: 2,
-                        shadowOffsetY: 2
-                    }
-                }],
-                series: [
-                    {
-                        name: searchWord + '搜索趋势变化',
-                        type: 'line',
-                        smooth: true,
-                        symbol: 'none',
-                        sampling: 'average',
-                        itemStyle: {
-                            color: 'rgb(255, 70, 131)'
-                        },
-                        areaStyle: {//颜色可以调整
-                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
-                                offset: 0,
-                                color: '#23b7e5'
-                            }, {
-                                offset: 1,
-                                color: '#23b7e5'
-                            }]),
-                        },
-                        itemStyle: {
-                            normal: {
-                                color: '#23b7e5', //改变折线点的颜色
-                                lineStyle: {
-                                    color: '#23b7e5' //改变折线颜色
+                    }, {
+                        start: 0,
+                        end: 100,
+                        // startValue: dates[0],
+                        // endValue: dates[dates.length-1],
+                        handleIcon: 'M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
+                        handleSize: '80%',
+                        handleStyle: {
+                            color: '#fff',
+                            shadowBlur: 3,
+                            shadowColor: 'rgba(0, 0, 0, 0.6)',
+                            shadowOffsetX: 2,
+                            shadowOffsetY: 2
+                        }
+                    }],
+                    series: [
+                        {
+                            name: searchWord + '搜索趋势变化',
+                            type: 'line',
+                            smooth: true,
+                            symbol: 'none',
+                            sampling: 'average',
+                            itemStyle: {
+                                color: 'rgb(255, 70, 131)'
+                            },
+                            areaStyle: {//颜色可以调整
+                                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                                    offset: 0,
+                                    color: '#23b7e5'
+                                }, {
+                                    offset: 1,
+                                    color: '#23b7e5'
+                                }]),
+                            },
+                            itemStyle: {
+                                normal: {
+                                    color: '#23b7e5', //改变折线点的颜色
+                                    lineStyle: {
+                                        color: '#23b7e5' //改变折线颜色
+                                    }
                                 }
-                            }
-                        },
-                        data: jobTypeData.total     //这个数据要从后台获取               
-                        // data: [40, 20, 30, 50, 10, 20, 60, 80, 100]
-                    }
-                ]
-            };
+                            },
+                            data: jobTypeData.total     //这个数据要从后台获取
+                            // data: [40, 20, 30, 50, 10, 20, 60, 80, 100]
+                        }
+                    ]
+                };
 
-            myChart.setOption(option);
+                myChart.setOption(option);
 
+            });
 
-            // myChart.on('legendselectchanged', function (obj) {
-            //     var selected = {};
-            //     var category = "岗位";
-            //     if (obj.name == "岗位平均工资") {
-            //         selected["岗位平均工资"] = true;
-            //         selected["城市平均工资"] = false;
-            //         category = "岗位";
+        }
 
-            //     } else if (obj.name == "城市平均工资") {
-            //         selected["岗位平均工资"] = false;
-            //         selected["城市平均工资"] = true;
-            //         category = "城市";
-            //     }
-
-            //     if (category == "岗位") {
-            //         if (jobTypeData != null && typeof jobTypeData == "object") {
-            //             option.series[0].data = jobTypeData.AvgWage;
-            //             option.series[1].data = jobTypeData.AvgWage;
-            //             option.xAxis[0].data = jobTypeData.names;
-            //             option.legend.selected = selected;
-            //             this.setOption(option)
-            //             return;
-            //         }
-            //     } else if (category == "城市") {
-            //         if (cityData != null && typeof cityData == "object") {
-            //             option.series[0].data = cityData.AvgWage;
-            //             option.series[1].data = cityData.AvgWage;
-            //             option.xAxis[0].data = cityData.names;
-            //             option.legend.selected = selected;
-            //             this.setOption(option)
-            //             return;
-            //         }
-            //     }
-
-            //     $.ajax({
-            //         async: false,    //表示请求是否异步处理
-            //         type: "get",    //请求类型
-            //         url: '/getTrendByKeyword',//请求的 URL地址
-            //         dataType: "json",//返回的数据类型
-            //         data: { "kw": searchWord },
-            //         success: function (datas) {
-                                            
-            //             console.log(datas);
-
-            //             // option.series[0].data = datas.AvgWage;
-            //             // option.series[1].data = datas.AvgWage;
-            //             // option.xAxis[0].data = datas.names;
-            //             // if (category == "城市") {
-            //             //     cityData = datas;
-            //             // }
-            //         },
-            //         error: function (data) {
-
-            //         }
-            //     });
-
-            //     option.legend.selected = selected;
-            //     this.setOption(option)
-
-            // });
-
-
-        });
+        getTrendKeyword()
 
         if (option && typeof option === "object") {
             myChart.setOption(option, true);

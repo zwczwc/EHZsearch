@@ -51,8 +51,8 @@
                         <div class="ibox-content m-b-sm border-bottom">
                             <div class="input-group input-group-sm" style="position: relative;">
                                 <span class="input-group-addon">
-                                    <img style="display:block;width:100%;" src="{% static 'img/baidu_Logo.jfif' %}" />
-                                    <p style="margin:1em">请输入关键字、页码、日期</p>
+                                    <img style="display:block;width:100%;" src="{% static 'img/weibo_Logo.jpg' %}" />
+                                    <p style="margin:1em">请输入关键字、日期</p>
 
                                 </span>
 
@@ -66,7 +66,7 @@
                                 <span class="words-split"></span>
 
                                 <!-- 页码 -->
-                                <input type="text" value="76" class="form-control" id="page" />
+                                <!-- <input type="text" value="76" class="form-control" id="page" /> -->
 
                                 <!--日历-->
                                 <input type="text" name="daterange" id="reservation" class="form-control"
@@ -513,11 +513,11 @@
             $.ajax({
                 async: true,    //表示请求是否异步处理
                 type: "get",    //请求类型
-                url: "/job/onlineSpider",//请求的 URL地址
+                url: "/job/weiboSpider",//请求的 URL地址
                 dataType: "json",//返回的数据类型
-                data: { "kw": $("#kw").val(), "pn": $("#page").val(), "timeFrom": firstTimeStr, "timeTo": secondTimeStr },
+                data: { "kw": $("#kw").val(), "timeFrom": firstTimeStr, "timeTo": secondTimeStr },
                 success: function (datas) {
-                    console.log("百度数据",datas)
+                    console.log("微博数据",datas)
                     if (datas.msg == "success") {
                         // 把搜索结果写入缓存 ， 用在统计图传参
                         var searchValue = $("#kw").val();

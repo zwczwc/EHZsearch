@@ -11,9 +11,10 @@ from django.db import models
 class news_info(models.Model):
     title = models.CharField(max_length=255)
     link = models.CharField(max_length=255)
-    source = models.CharField(max_length=255)
+    author = models.CharField(max_length=255)
     time = models.CharField(max_length=255)
     abstract = models.CharField(max_length=255)
+    source = models.CharField(max_length=255)
 
 class keyword_info(models.Model):
     name = models.CharField(max_length=255)

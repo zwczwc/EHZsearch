@@ -19,6 +19,7 @@ from django.db.models import F
 from django.db.models import Count
 from .models import news_info
 from .models import keyword_info
+
 import operator
 from dwebsocket.decorators import accept_websocket, require_websocket
 
@@ -57,7 +58,7 @@ def getNewsInfos(request):
     # 时间区间自定义
     key_word["timeFrom"] = request.GET.get("timeFrom", "空")
     key_word["timeTo"] = request.GET.get("timeTo", "")
-    key_word["source"] = request.GET.get("source", "")
+    key_word["author"] = request.GET.get("author", "")
 
     result = getNewsInfoByPageAndRows(page, rows, key_word)
     return HttpResponse(json.dumps(result), content_type="application/json")
@@ -76,17 +77,17 @@ def getNewsInfoByPageAndRows(page, rows, key_word):
 
     # 时间范围用time__gte
     # news = news_info.objects.filter(Q(title__icontains=key_word["title"]) &
-    #                                     Q(time__gte=queryTime) & Q(source__icontains=key_word["source"]))
+    #                                     Q(time__gte=queryTime) & Q(author__icontains=key_word["author"]))
     if (key_word["timeFrom"] == '空'):
         news = news_info.objects.filter(Q(title__icontains=key_word["title"]) &
-                                        Q(source__icontains=key_word["source"])).order_by('-time')
+                                        Q(author__icontains=key_word["author"])).order_by('-time')
     else:
         # 时间区间查询法
         timeFrom = key_word["timeFrom"] + ' 00:00:00'
         timeTo = key_word["timeTo"] + ' 23:59:59'
         news = news_info.objects.filter(Q(title__icontains=key_word["title"]) &
                                         Q(time__gte=timeFrom) & Q(time__lte=timeTo) & Q(
-            source__icontains=key_word["source"])).order_by('-time')
+            author__icontains=key_word["author"])).order_by('-time')
 
     paginator = Paginator(news, rows)
     query_sets = paginator.page(page)
@@ -187,7 +188,6 @@ def deleteKeyword(request):
 
 
 def addKeywordByPost(request):
-
     json_result = json.loads(request.body)
 
     keywordList = json_result['data']
@@ -205,14 +205,16 @@ def deleteKeywordByPost(request):
 
     return HttpResponse(json.dumps({'msg': 'success'}), content_type="application/json")
 
+
 def updateKeywordByPost(request):
     json_result = json.loads(request.body)
     oldKeywordList = json_result['oldkw']
     newKeywordList = json_result['newkw']
-    for (olditem,newitem) in zip(oldKeywordList,newKeywordList):
+    for (olditem, newitem) in zip(oldKeywordList, newKeywordList):
         keyword_info.objects.filter(name=str(olditem)).update(name=str(newitem))
 
     return HttpResponse(json.dumps({'msg': 'success'}), content_type="application/json")
+
 
 def Redirect(url):
     res = requests.get(url, timeout=10)
@@ -281,7 +283,7 @@ def baidu_search(wd, pn, timeFrom, timeTo):
             # link_res = Redirect(link)
             # author切片
             list_author = item.find('p', class_='c-author').get_text().strip().replace("\n", "").split('\xa0\xa0')
-            source = list_author[0]
+            author = list_author[0]
             tmpTime1 = list_author[1].lstrip()
             list_abstract = item.find('div', class_='c-summary').get_text().strip().replace("\n", "").replace('\xa0',
                                                                                                               '').replace(
@@ -306,21 +308,21 @@ def baidu_search(wd, pn, timeFrom, timeTo):
             res_item = {}
             res_item['title'] = title
             res_item['link'] = link
-            res_item['source'] = source
+            res_item['author'] = author
             res_item['time'] = resTime
             res_item['abstract'] = abstract
             res['data'].append(res_item)
             # 写数据库，不重复插入
-            news_info.objects.get_or_create(title=title, link=link, source=source, time=resTime, abstract=abstract)
+            news_info.objects.get_or_create(title=title, link=link, author=author, time=resTime, abstract=abstract)
             # 写文件
             f.write('-------------------\n')
             f.write('标题：' + title + '\n')
             f.write('链接：' + link + '\n')
-            f.write('来源：' + source + '\n')
+            f.write('来源：' + author + '\n')
             f.write('日期：' + resTime + '\n')
             f.write('摘要：' + abstract + '\n')
             f.write('-------------------\n')
-            # csv_writer.writerow([title, link, source, time, abstract])
+            # csv_writer.writerow([title, link, author, time, abstract])
 
     print('endend')
     # 关闭文件
@@ -355,21 +357,52 @@ def baiduNewsSpider(request):
 
     # print(baidu_search(kw, pn))
 
+
 def weiboSpider(request):
     kw = request.GET.get("kw", '华制智能')
     pn = request.GET.get("pn", '1')
-    timeFrom = request.GET.get("timeFrom", '空')
-    timeTo = request.GET.get("timeTo", '空')
-    if (timeFrom != '空'):
-        timeFrom += ' 00:00:00'
-        timeTo += ' 23:59:59'
-    # try:
-    res = weiboSearch(kw, pn, timeFrom, timeTo)
-    res['msg'] = 'success'
-    return HttpResponse(json.dumps(res), content_type="application/json")
 
-def weiboSearch(kw, pn, timeFrom, timeTo):
-    return HttpResponse(json.dumps({'msg':"success"}), content_type="application/json")
+    res = {'data': []}
+    # 返回的iframe的url用手机版weibo的搜索网页
+    res['url'] = 'https://m.weibo.cn/search?containerid=100103type%3D1%26q%3D' \
+                 + 'kw'
+    # 爬取对象为一个来自网上的简易新浪微博接口
+    # url = 'https://weibo.cn/search/mblog?hideSearchFrame=&keyword=%E7%8E%8B%E4%B8%80%E5%8D%9A&page=6'
+    for i in range(1, int(pn) + 1, 1):
+        url = 'http://sinanews.sina.cn/interface/type_of_search.d.html?' \
+            'keyword='+kw+'&page='+str(i)+'&size=10'
+        print(url)
+        # Get方式获取网页数据
+        response = requests.get(url, headers=headersParameters)
+        content = json.loads(response.content.decode('utf-8'))
+        data = content.get('data').get('feed1')
+        for item in data:
+            title = item.get('title')
+            link = item.get('url')
+            author = item.get('user').get('name')
+            time = item.get('time')
+            # 写结果
+            res_item = {}
+            res_item['title'] = title
+            res_item['link'] = link
+            res_item['author'] = author
+            res_item['time'] = time
+            res['data'].append(res_item)
+            # 写数据库，不重复插入
+            news_info.objects.get_or_create(title=title, link=link, author=author, time=time)
+
+
+    # info_json = content.get('data').get('feed1')
+    #     # # print()
+    #     # for items in info_json:
+    #     #     item = items.get('mblog')
+    #     #     # print(item)
+    # print(info_json)
+    res['msg'] = 'success'
+
+    # return HttpResponse(json.dumps(response.text[9:-1]), content_type="application/json")
+    return HttpResponse(json.dumps(res,ensure_ascii=False), content_type="application/json")
+
 
 # 关键词趋势变化图
 def getTrendByKeyword(request):
@@ -391,20 +424,20 @@ def getTrendByKeyword(request):
 
 
 # 关键词的来源图
-def getSourceChartByKeyword(request):
+def getAuthorChartByKeyword(request):
     kw = request.GET.get("kw", '华制智能')
     # 多次结果中筛选
-    # resQuery = news_info.objects.filter(Q(title__icontains=kw)).values('source').order_by('time')
+    # resQuery = news_info.objects.filter(Q(title__icontains=kw)).values('author').order_by('time')
     # 只针对一次
-    resQuery = news_info.objects.all().values('source')
-    sourceDict = {}
+    resQuery = news_info.objects.all().values('author')
+    authorDict = {}
     for item in resQuery:
-        if (item['source'] not in sourceDict):
-            sourceDict[item['source']] = 1
+        if (item['author'] not in authorDict):
+            authorDict[item['author']] = 1
         else:
-            sourceDict[item['source']] += 1
+            authorDict[item['author']] += 1
 
-    res = {'source': list(sourceDict.keys()), 'total': list(sourceDict.values())}
+    res = {'author': list(authorDict.keys()), 'total': list(authorDict.values())}
     return HttpResponse(json.dumps(res, ensure_ascii=False), content_type="application/json")
 
 

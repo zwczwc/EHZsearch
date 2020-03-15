@@ -33,7 +33,7 @@ urlpatterns = [
     path('job/companyInfo', views.companyInfo),
     path('job/getNewsInfo', views.getNewsInfos),
     path('getTrendByKeyword', views.getTrendByKeyword),
-    path('getSourceChartByKeyword',views.getSourceChartByKeyword),
+    path('getAuthorChartByKeyword',views.getAuthorChartByKeyword),
     path('getKeyword', views.getKeyword),
     path('addKeyword', views.addKeyword),
     path('deleteKeyword',views.deleteKeyword),

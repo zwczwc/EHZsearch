@@ -371,7 +371,7 @@ def weiboSpider(request):
     for i in range(1, int(pn) + 1, 1):
         url = 'http://sinanews.sina.cn/interface/type_of_search.d.html?' \
             'keyword='+kw+'&page='+str(i)+'&size=10'
-        print(url)
+        # print(url)
         # Get方式获取网页数据
         response = requests.get(url, headers=headersParameters)
         content = json.loads(response.content.decode('utf-8'))

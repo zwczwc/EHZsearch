@@ -66,14 +66,11 @@
                                 <span class="words-split"></span>
 
                                 <!-- 页码 -->
-                                <!-- <input type="text" value="76" class="form-control" id="page" /> -->
+                                <input type="text" value="76" class="form-control" id="page" />
 
-                                <!--日历-->
-                                <input type="text" name="daterange" id="reservation" class="form-control"
-                                    autocomplete="off" placeholder="请选择日期" />
 
                                 <button type="button" class="form-control" id="startSpide">开始</button>
-                                <button type="button" class="form-control" id="downLoad" style="width:100px;height:50px;position: absolute;top:91px;right:27px;display: none;">下载</button>
+<!--                                <button type="button" class="form-control" id="downLoad" style="width:100px;height:50px;position: absolute;top:91px;right:27px;display: none;">下载</button>-->
 
                             </div>
 
@@ -119,7 +116,6 @@
     <script src="{% static 'js/plugins/peity/jquery.peity.min.js' %}"></script>
     <!-- 自定义js -->
     <script src="{% static 'js/content.js' %}"></script>
-    <script src="{% static 'js/daterangepicker.js' %}"></script>
 
 
     <script>
@@ -218,47 +214,6 @@
         }
 
 
-        // 日期
-        
-        $('input[name="daterange"]').daterangepicker({
-                timePicker: true, //显示时间
-                //timePicker24Hour: true, //时间制
-                // timePickerSeconds: true, //时间显示到秒
-                // startDate: moment().hours(0).minutes(0).seconds(0), //设置开始日期
-                startDate:moment(new Date()),
-                endDate: moment(new Date()), //设置结束器日期
-                maxDate: moment(new Date()), //设置最大日期
-                // "opens": "center",
-                // ranges: {
-                    
-                // // '今天': [moment(), moment()],
-                // '昨天': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-                // '上周': [moment().subtract(6, 'days'), moment()],
-                // '前30天': [moment().subtract(29, 'days'), moment()],
-                // '本月': [moment().startOf('month'), moment().endOf('month')],
-                // '上月': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
-                // },
-                showWeekNumbers: true,
-                locale: {
-                    format: "YYYY-MM-DD HH:mm:ss", //设置显示格式
-                    applyLabel: '确定', //确定按钮文本
-                    cancelLabel: '取消', //取消按钮文本
-                    customRangeLabel: '自定义',
-                    daysOfWeek: ['日', '一', '二', '三', '四', '五', '六'],
-                    monthNames: ['一月', '二月', '三月', '四月', '五月', '六月',
-                        '七月', '八月', '九月', '十月', '十一月', '十二月'
-                    ],
-                    firstDay: 1
-                },
-            }, 
-            function(start, end, label) {
-            // timeRangeChange = [start.format('YYYY-MM-DD HH:mm:ss'), end.format('YYYY-MM-DD HH:mm:ss')];
-            // console.log(timeRangeChange);
-        });    
-
-
-
-
 
         // 判断两个数组是否为包含关系
         function includes(arr1, arr2) {
@@ -274,11 +229,6 @@
             var objArr2 = keyInitialValue.split(",");
             console.log(keyInitialValue == $("#staticPath2").val(),objArr1,objArr2,$(".fm-button span").val()==undefined)
 
-            // console.log(objArr1 !== objArr2)
-            // if(objArr1 !== objArr2) {
-            // 新的数组长度大于一开始获取的关键词数组长度 走新增post操作
-
-            // 外层换个方法在两个数组中找不一样的
 
             if (objArr1.length > objArr2.length && includes(objArr1, objArr2)) { //包含 走新增
                 // 如果包含 走新增 ；  不包含  走更新
@@ -436,22 +386,7 @@
                     }
                 });
             }
-            // }
-            // console.log(getKeyArr)
-            // if (objArr1.length == objArr2.length && includes(objArr2, objArr1) ) {
-            //     var newObjArr = { oldkw: objArr2, newkw: objArr1 }
-            //     console.log(newObjArr, getKeyArr==objArr1,objArr2)
-            //     $.ajax({
-            //         async: true,    //表示请求是否异步处理
-            //         type: "post",    //请求类型
-            //         url: "/updateKeywordByPost",//请求的URL地址
-            //         dataType: "json",//返回的数据类型
-            //         data: JSON.stringify(newObjArr),   // 转为字符串
-            //         success: function (datas) {
-            //             console.log(datas)
-            //         }
-            //     });
-            // }
+
 
             if(getKeyArr.length == 0) {  //一开始得到的是空数组情况
                 console.log("全部走新增")
@@ -495,27 +430,17 @@
                 return;
             }
 
-            var str = $("#reservation").val()
-            var firstTimeStr = "空";
-            var secondTimeStr = "空";
-            if (str != "") {
-                var strArr = str.split("-")
-                var firstTime = strArr[0] + "-" + strArr[1] + "-" + strArr[2];
-                var secondTime = strArr[3] + "-" + strArr[4] + "-" + strArr[5];
-                firstTimeStr = firstTime.replace(/\s+/g, "");   //js去掉右空格 
-                secondTimeStr = secondTime.replace(/\s+/g, "");
-            }
             $("#myModal2").modal({
                 backdrop: "static", // 相当于data-backdrop
                 keyboard: false, // 相当于data-keyboard
                 show: true  // 相当于data-show
             });
-            $.ajax({
+            $.ajax({f
                 async: true,    //表示请求是否异步处理
                 type: "get",    //请求类型
-                url: "/job/weiboSpider",//请求的 URL地址
+                url: "/weiboSpider",//请求的 URL地址
                 dataType: "json",//返回的数据类型
-                data: { "kw": $("#kw").val(), "timeFrom": firstTimeStr, "timeTo": secondTimeStr },
+                data: { "kw": $("#kw").val(), "pn": $("#page").val()},
                 success: function (datas) {
                     console.log("微博数据",datas)
                     if (datas.msg == "success") {
@@ -528,7 +453,7 @@
                         document.getElementById("mainIframe").src = "/static/" + datas.filename;
 
                         $('#myModal2').modal('hide');
-                        $("#downLoad").show();
+                        //$("#downLoad").show();
                     }
                 },
                 error: function (data) {
@@ -537,9 +462,9 @@
             });
         });
 
-        $("#downLoad").click(function () {
-            window.downloadFile(document.getElementById("mainIframe").src);
-        });
+        //$("#downLoad").click(function () {
+           // window.downloadFile(document.getElementById("mainIframe").src);
+        //});
 
         // 文件下载
         window.downloadFile = function (sUrl) {

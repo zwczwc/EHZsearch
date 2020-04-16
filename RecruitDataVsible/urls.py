@@ -41,6 +41,7 @@ urlpatterns = [
     path('deleteKeywordByPost', views.deleteKeywordByPost),
     path('updateKeywordByPost', views.updateKeywordByPost),
     path('weiboSpider', views.weiboSpider),
+    path('weixinSpider', views.weixinSpider),
     path('getWordCloud', views.getWordCloud)
 
 ]

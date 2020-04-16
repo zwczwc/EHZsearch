@@ -1,0 +1,513 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title> - 论坛</title>
+
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+
+    <link rel="shortcut icon" href="{% static 'favicon.ico' %}">
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/font-awesome.css' %}" rel="stylesheet">
+    <link href="{% static 'css/daterangepicker-bs3.css' %}" rel="stylesheet">
+
+    <link href="{% static 'css/animate.css' %}" rel="stylesheet">
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+    <!-- addKeyWords添加关键词样式 -->
+    <link rel="stylesheet" href="{% static 'css/addKeyWords.css' %}">
+    <link href="{% static 'css/fontawesome-webfont.woff' %}" rel="stylesheet">
+
+    <style>
+        .input-group-sm>.form-control, .input-group-sm>.input-group-addon, .input-group-sm>.input-group-btn>.btn {
+            height: 42px;
+            margin: 6px 0;
+        }
+        .input-group-addon {
+            border: none;
+        }
+        .daterangepicker .calendar-time {
+            display: none
+        }
+    </style>
+
+</head>
+
+<!-- 新加文件 -->
+
+<body class="gray-bg">
+
+    <div class="row">
+        <div class="wrapper wrapper-content animated fadeInRight">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="wrapper wrapper-content animated fadeInRight">
+
+                        <div class="ibox-content m-b-sm border-bottom">
+                            <div class="input-group input-group-sm" style="position: relative;">
+                                <span class="input-group-addon">
+                                    <img style="display:block;width:100%;" src="{% static 'img/weixin_logo.png' %}" />
+                                    <p style="margin:1em">请输入关键字、日期</p>
+
+                                </span>
+
+                                <!-- 换搜索框 要爬取到百度的关键字-->
+                                <input type="text" placeholder="请输入您需搜索的内容 …" autocomplete="off" class="form-control"
+                                    id="kw" />
+
+                                <!-- 添加关键词 -->
+                                <input type="text" class="form-control" name="staticPath" value="" id="staticPath2"
+                                    style="display: none;" />
+                                <span class="words-split"></span>
+
+                                <!-- 页码 -->
+                                <input type="text" value="76" class="form-control" id="page" />
+
+
+                                <button type="button" class="form-control" id="startSpide">开始</button>
+<!--                                <button type="button" class="form-control" id="downLoad" style="width:100px;height:50px;position: absolute;top:91px;right:27px;display: none;">下载</button>-->
+
+                            </div>
+
+                        </div>
+
+                        <div style="width:100%;height:500px;background:#fff">
+                            <!-- 放url连接-->
+                            <iframe id="contentIframe" src="" frameborder="0" style="overflow: scroll;width: 49%;height: 500px;float:left"></iframe>
+
+                            <!-- 放文本文件-->
+                            <iframe id="mainIframe" src="" frameborder="0" style="overflow: scroll;width: 49%;height: 500px;float:right"></iframe>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal inmodal" id="myModal2" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content animated flipInY">
+                <div class="modal-header">
+                    <h4 class="modal-title">正在爬取...</h4>
+                </div>
+                <div class="modal-body" style="position: relative;height:300px;">
+                    <img width="200" height="125" src="{% static 'img/loading.gif' %}" style="position:absolute;left:0;right: 0;top: 0;bottom: 0;margin: auto;"></img>
+                </div>
+                <div class="modal-footer">
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- 全局js -->
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'js/moment.js' %}"></script>
+    <!-- Peity -->
+    <script src="{% static 'js/plugins/peity/jquery.peity.min.js' %}"></script>
+    <!-- 自定义js -->
+    <script src="{% static 'js/content.js' %}"></script>
+
+
+    <script>
+
+        // 一开始读取后台关键字
+        var keyInitialValue = ""
+        var getKeyArr = [];
+        $.ajax({
+            async: true,    //表示请求是否异步处理
+            type: "get",    //请求类型
+            url: "/getKeyword",//请求的 URL地址
+            dataType: "json",//返回的数据类型
+            success: function (datas) {
+                // 写入页面
+                var str = ""
+                console.log(datas); getKeyArr = datas.data;
+                // 当后台返回有关键词才写入
+
+                if (datas.data.length >= 1) {
+                   
+                    datas.data.forEach(item => {
+                        str += item + ",";
+                        $("#words-split a span").html(item);
+                    })
+                    if (str.length > 0) {//去掉最后一个逗号
+                        str = str.substr(0, str.length - 1)
+                        keyInitialValue = str;    // 存在外部变量，新增和删除对比时有用
+                    }
+                    $("#staticPath2").val(str)
+
+                    // 添加固定关键词
+                    WS({ el: '#staticPath2' })
+
+                    // 点击关键词标签，放入搜索框
+                    $(".words-split").on("click", "a span", function (e) {
+                        $("#kw").val($(this).text())
+                    })
+                }
+                else {
+                    $("#staticPath2").val("")
+
+                    // 添加固定关键词
+                    WS({ el: '#staticPath2' })
+
+                }
+
+            }
+        });
+
+        // 添加固定关键词
+        var WS = function (opt) {
+            var regexp = opt.regexp || /\S/,
+                el = $(opt.el),
+                list = el.val().split(','),
+                holder = $('.words-split');
+                add = $('<a href="javascript:void(0)" class="words-split-add">+</a>');
+            
+            // 后台有返回关键词时才有字符串   
+            if(list != "") {
+                for (var i = 0; i < list.length; i++) {
+                    holder.append($(`<a href="javascript:void(0)" class="fm-button"><span>` + list[i] + '</span> <em> </em></a>'));
+                }
+            }   
+            el.hide().after(holder);
+            holder.after(add);   
+            
+            
+            holder.on('click', 'a>em', function () {	//刪除
+                $(this).parent().remove()
+                el.val(holder.text().match(/\S+/g).join(','))
+            });
+            add.on('click', function () {				//添加预处理
+                $(this).hide()
+                holder.append($('<span class="lbl-input" contenteditable="true"/>'))
+            });
+            holder.on('blur', '.lbl-input', function () {	//验证添加字段
+                var t = $(this), v = t.text();
+                if (regexp.test(v)) {
+                    t.remove();
+                    add.show();
+                    holder.append($('<a href="javascript:void(0)" class="fm-button"><span>' + v + '</span><em> </em></a>'));
+                    el.val(holder.text().match(/\S+/g).join(','))
+                }
+                else if (!v) {
+                    t.remove();
+                    add.show();
+                }
+            })
+            holder.on('keydown', '.lbl-input', function (e) {
+                var t = $(this), v = t.text();
+                switch (e.keyCode) {
+                    case 13:
+                    case 27: $(this).trigger('blur');
+                }
+            })
+        }
+
+
+
+        // 判断两个数组是否为包含关系
+        function includes(arr1, arr2) {
+            return arr2.every(val => arr1.includes(val));
+        }
+
+
+        // 开始爬取
+        $("#startSpide").click(function (event) {
+
+            // 点击开始时候对比从后台拿到的和修改后的关键字结果，删除的就del，新增的就add
+            var objArr1 = $("#staticPath2").val().split(",");
+            var objArr2 = keyInitialValue.split(",");
+            console.log(keyInitialValue == $("#staticPath2").val(),objArr1,objArr2,$(".fm-button span").val()==undefined)
+
+
+            if (objArr1.length > objArr2.length && includes(objArr1, objArr2)) { //包含 走新增
+                // 如果包含 走新增 ；  不包含  走更新
+
+                let newArr = objArr1.filter(item => !objArr2.some(ele => ele === item));
+                console.log(newArr)
+                // var objArr = $("#staticPath2").val().split(",")
+                var json_object = { data: newArr }
+                $.ajax({
+                    // async: true,    //表示请求是否异步处理
+                    type: "post",    //请求类型
+                    url: "/addKeywordByPost",//请求的URL地址
+                    // contentType: "application/json",
+                    dataType: "json",//返回的数据类型
+                    // data: {data:newArr},
+                    data: JSON.stringify(json_object),   // 转为字符串
+                    success: function (datas) {
+                        console.log(datas)
+                    },
+                    error: function (data) {
+                        console.log(data)
+                    }
+                });
+            }
+            if (objArr1.length > objArr2.length && !includes(objArr1, objArr2)) { //不包含 走删除再走新增
+                let newArr = objArr1.filter(item => !objArr2.some(ele => ele === item));
+                let oS1 = new Set(objArr1);     // 先去重
+                let oS2 = new Set(objArr2);
+                let newoArr = [...oS1].filter(ele => !oS2.has(ele));    //即return oS2.has(ele)
+                let totalArr = [...new Set([...oS1, ...oS2])]
+                // console.log(newoArr, objArr1, totalArr);  //(2) [2, 3]
+                // 从objArr1, totalArr找到差集，就是要删除得部分
+
+                let oSobjArr1 = new Set(objArr1);     // 先去重
+                let oS2objArr2 = new Set(totalArr);
+                let newArr1 = [...oS2objArr2].filter((ele) => {
+                    return !oSobjArr1.has(ele);
+                })
+                var delArr = [...newArr1];
+                console.log(newoArr, delArr)
+                var newDelArr = { data: delArr }
+                var newAddArr = { data: newoArr }
+                // 先删除 
+                $.ajax({
+                    // async: true,    //表示请求是否异步处理
+                    type: "post",    //请求类型
+                    url: "/deleteKeywordByPost",//请求的URL地址
+                    dataType: "json",//返回的数据类型
+                    data: JSON.stringify(newDelArr),   // 转为字符串
+                    success: function (datas) {
+                        console.log(datas)
+                        // 再添加
+                        $.ajax({
+                            // async: true,    //表示请求是否异步处理
+                            type: "post",    //请求类型
+                            url: "/addKeywordByPost",//请求的URL地址
+                            // contentType: "application/json",
+                            dataType: "json",//返回的数据类型
+                            // data: {data:newArr},
+                            data: JSON.stringify(newAddArr),   //转为字符串  
+                            success: function (datas) {
+                                console.log(datas)
+                            },
+                            error: function (data) {
+                                console.log(data)
+                            }
+                        });
+                    }
+                });
+
+
+            }
+
+
+            // 删除操作
+            if (objArr1.length < objArr2.length && includes(objArr2, objArr1)) {
+                // console.log(includes(objArr2, objArr1))
+                var newObjArr = ""
+                var oS1 = new Set(objArr1);     // 先去重
+                var oS2 = new Set(objArr2);
+                var newArr = [...oS2].filter(ele => !oS1.has(ele))
+                newObjArr = newArr;
+                // length为1并且span下没有a标签，表示最后一个也删除了, 获取删除的文本 拼成数组
+                if ($(".words-split a").length == 0) {
+                    newObjArr = newArr.concat(objArr1)
+                }
+                console.log(newObjArr)
+                var newObjArr = { data: newObjArr }
+                $.ajax({
+                    // async: true,    //表示请求是否异步处理
+                    type: "post",    //请求类型
+                    url: "/deleteKeywordByPost",//请求的URL地址
+                    dataType: "json",//返回的数据类型
+                    data: JSON.stringify(newObjArr),   // 转为字符串
+                    success: function (datas) {
+                        console.log(datas)
+                    }
+                });
+            }
+            if (objArr1.length < objArr2.length && !includes(objArr2, objArr1)) {
+                // console.log(objArr2, objArr1)
+                // var newObjArr = ""
+                var oS1qwe = new Set(objArr1);     // 先去重
+                var oS2yert = new Set(objArr2);
+                var delNewArroS1qwe = [...oS2yert].filter(ele => !oS1qwe.has(ele))
+                var totalasdfwe = [...oS1qwe, ...oS2yert];
+                var totalasdf = new Set([...oS1qwe, ...oS2yert]);
+                console.log(oS2yert, totalasdf)
+                var addgrhe = totalasdfwe.filter(ele => !oS2yert.has(ele))
+
+                console.log(delNewArroS1qwe, addgrhe)
+
+                var shrtqw = { data: delNewArroS1qwe };
+                var wrrete = { data: addgrhe }
+
+                // 先删除
+                $.ajax({
+                    // async: true,    //表示请求是否异步处理
+                    type: "post",    //请求类型
+                    url: "/deleteKeywordByPost",//请求的URL地址
+                    dataType: "json",//返回的数据类型
+                    data: JSON.stringify(shrtqw),   // 转为字符串
+                    success: function (datas) {
+                        // 再新增
+                        $.ajax({
+                            // async: true,    //表示请求是否异步处理
+                            type: "post",    //请求类型
+                            url: "/addKeywordByPost",//请求的URL地址
+                            // contentType: "application/json",
+                            dataType: "json",//返回的数据类型
+                            // data: {data:newArr},
+                            data: JSON.stringify(wrrete),   // 转为字符串
+                            success: function (datas) {
+                                console.log(datas)
+                            },
+                            error: function (data) {
+                                console.log(data)
+                            }
+                        });
+                    }
+                });
+            }
+            // 更新操作
+            if (objArr1.length == objArr2.length && getKeyArr.length != 0 && !includes(objArr2, objArr1)) {
+                var newObjArr = { oldkw: objArr2, newkw: objArr1 }
+                console.log(newObjArr, getKeyArr==objArr1,objArr2)
+                $.ajax({
+                    async: true,    //表示请求是否异步处理
+                    type: "post",    //请求类型
+                    url: "/updateKeywordByPost",//请求的URL地址
+                    dataType: "json",//返回的数据类型
+                    data: JSON.stringify(newObjArr),   // 转为字符串
+                    success: function (datas) {
+                        console.log(datas)
+                    }
+                });
+            }
+
+
+            if(getKeyArr.length == 0) {  //一开始得到的是空数组情况
+                console.log("全部走新增")
+                var json_object = { data: objArr1 }
+                console.log(json_object)
+                $.ajax({
+                    // async: true,    //表示请求是否异步处理
+                    type: "post",    //请求类型
+                    url: "/addKeywordByPost",//请求的URL地址
+                    // contentType: "application/json",
+                    dataType: "json",//返回的数据类型
+                    // data: {data:newArr},
+                    data: JSON.stringify(json_object),   // 转为字符串
+                    success: function (datas) {
+                        console.log(datas)
+                    },
+                    error: function (data) {
+                        console.log(data)
+                    }
+                });
+                
+            }
+
+            if($(".fm-button span").val()==undefined) { // 没有任何东西,所以要删除了
+                var newObjArr = { data: objArr1 }
+                $.ajax({
+                    // async: true,    //表示请求是否异步处理
+                    type: "post",    //请求类型
+                    url: "/deleteKeywordByPost",//请求的URL地址
+                    dataType: "json",//返回的数据类型
+                    data: JSON.stringify(newObjArr),   // 转为字符串
+                    success: function (datas) {
+                        console.log(datas)
+                    }
+                });
+            }
+
+
+            if ($("#kw").val() == "") {
+                alert("请输入关键字")
+                return;
+            }
+
+            $("#myModal2").modal({
+                backdrop: "static", // 相当于data-backdrop
+                keyboard: false, // 相当于data-keyboard
+                show: true  // 相当于data-show
+            });
+            $.ajax({f
+                async: true,    //表示请求是否异步处理
+                type: "get",    //请求类型
+                url: "/weixinSpider",//请求的 URL地址
+                dataType: "json",//返回的数据类型
+                data: { "kw": $("#kw").val(), "pn": $("#page").val()},
+                success: function (datas) {
+                    console.log("微信数据",datas)
+                    if (datas.msg == "success") {
+                        // 把搜索结果写入缓存 ， 用在统计图传参
+                        var searchValue = $("#kw").val();
+                        localStorage.setItem("searchValue", searchValue);
+
+                        // 文本和url    
+                        document.getElementById("contentIframe").src = datas.url;
+                        document.getElementById("mainIframe").src = "/static/" + datas.filename;
+
+                        $('#myModal2').modal('hide');
+                        //$("#downLoad").show();
+                    }
+                },
+                error: function (data) {
+                    console.log(data)
+                }
+            });
+        });
+
+        //$("#downLoad").click(function () {
+           // window.downloadFile(document.getElementById("mainIframe").src);
+        //});
+
+        // 文件下载
+        window.downloadFile = function (sUrl) {
+
+            //iOS devices do not support downloading. We have to inform user about this.
+            if (/(iP)/g.test(navigator.userAgent)) {
+                alert('Your device does not support files downloading. Please try again in desktop browser.');
+                return false;
+            }
+
+            //If in Chrome or Safari - download via virtual link click
+            if (window.downloadFile.isChrome || window.downloadFile.isSafari) {
+                //Creating new link node.
+                var link = document.createElement('a');
+                link.href = sUrl;
+
+                if (link.download !== undefined) {
+                    //Set HTML5 download attribute. This will prevent file from opening if supported.
+                    var fileName = sUrl.substring(sUrl.lastIndexOf('/') + 1, sUrl.length);
+                    link.download = fileName;
+                }
+
+                //Dispatching click event.
+                if (document.createEvent) {
+                    var e = document.createEvent('MouseEvents');
+                    e.initEvent('click', true, true);
+                    link.dispatchEvent(e);
+                    return true;
+                }
+            }
+
+            // Force file download (whether supported by server).
+            if (sUrl.indexOf('?') === -1) {
+                sUrl += '?download';
+            }
+
+            window.open(sUrl, '_self');
+            return true;
+        }
+
+        window.downloadFile.isChrome = navigator.userAgent.toLowerCase().indexOf('chrome') > -1;
+        window.downloadFile.isSafari = navigator.userAgent.toLowerCase().indexOf('safari') > -1;
+    </script>
+</body>
+
+</html>

@@ -404,6 +404,47 @@ def weiboSpider(request):
     # return HttpResponse(json.dumps(response.text[9:-1]), content_type="application/json")
     return HttpResponse(json.dumps(res,ensure_ascii=False), content_type="application/json")
 
+def weixinSpider(request):
+    kw = request.GET.get("kw", '华制智能')
+    pn = request.GET.get("pn", '1')
+    res = {'data': []}
+    # 返回的iframe的url用手机版weibo的搜索网页
+    res['url'] = 'https://weixin.sogou.com/weixin?' \
+                 'query='+ kw +'&type=2&page=1&ie=utf8'
+
+    for i in range(1, int(pn) + 1, 1):
+        url = 'https://weixin.sogou.com/weixin?' \
+              'query=' + kw + '&page=' + str(i) + '&type=2'
+        print(url)
+        # Get方式获取网页数据
+        strhtml = requests.get(url, headers=headersParameters)
+        strhtml.encoding = "utf-8"
+        # 解析
+        soup = BeautifulSoup(strhtml.text, 'lxml')
+        data = soup.select('.txt-box')
+
+        for item in data:
+            title = item.find('a').get_text()
+            link = item.find('a').get('href').strip()
+            abstract = item.find('p', class_='txt-info').get_text().strip()
+            author = item.find('a', class_='account').get_text().strip()
+            tmpTime = item.find('span', class_='s2').get_text().strip()
+            tmpTime = tmpTime[-13:-3]
+            dateArray = datetime.datetime.utcfromtimestamp(int(tmpTime))
+            time = dateArray.strftime("%Y-%m-%d %H:%M:%S")
+            # 写结果
+            res_item = {}
+            res_item['title'] = title
+            res_item['link'] = link
+            res_item['abstract'] = abstract
+            res_item['author'] = author
+            res_item['time'] = time
+            res['data'].append(res_item)
+            # 写数据库，不重复插入
+            news_info.objects.get_or_create(title=title, link=link, author=author, time=time)
+    res['msg'] = 'success'
+    # return HttpResponse(json.dumps(response.text[9:-1]), content_type="application/json")
+    return HttpResponse(json.dumps(res, ensure_ascii=False), content_type="application/json")
 
 # 关键词趋势变化图
 def getTrendByKeyword(request):
@@ -447,7 +488,7 @@ def companyInfo(request):
     return HttpResponse(json.dumps(getCompanyInfoByNumberId(numberid)), content_type="application/json")
 
 def getWordCloud(request):
-    kw = request.GET.get("kw", '游戏')
+    kw = request.GET.get("kw", '腾讯')
     words = []  # 所有单词
     two_words = []  # 大于或等于两个单词
     resQuery = news_info.objects.filter(Q(title__icontains=kw)).values_list('title',flat=True)

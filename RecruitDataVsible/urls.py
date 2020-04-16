@@ -36,11 +36,12 @@ urlpatterns = [
     path('getAuthorChartByKeyword',views.getAuthorChartByKeyword),
     path('getKeyword', views.getKeyword),
     path('addKeyword', views.addKeyword),
-    path('deleteKeyword',views.deleteKeyword),
+    path('deleteKeyword', views.deleteKeyword),
     path('addKeywordByPost', views.addKeywordByPost),
-    path('deleteKeywordByPost',views.deleteKeywordByPost),
-    path('updateKeywordByPost',views.updateKeywordByPost),
-    path('weiboSpider',views.weiboSpider)
+    path('deleteKeywordByPost', views.deleteKeywordByPost),
+    path('updateKeywordByPost', views.updateKeywordByPost),
+    path('weiboSpider', views.weiboSpider),
+    path('getWordCloud', views.getWordCloud)
 
 ]
 

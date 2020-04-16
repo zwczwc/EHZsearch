@@ -19,8 +19,9 @@ from django.db.models import F
 from django.db.models import Count
 from .models import news_info
 from .models import keyword_info
-
+import jieba
 import operator
+from collections import Counter
 from dwebsocket.decorators import accept_websocket, require_websocket
 
 # 发送HTTP请求时的HEAD信息，用于伪装为浏览器
@@ -445,6 +446,18 @@ def companyInfo(request):
     numberid = request.GET.get("numberId", "CC526060929")
     return HttpResponse(json.dumps(getCompanyInfoByNumberId(numberid)), content_type="application/json")
 
+def getWordCloud(request):
+    kw = request.GET.get("kw", '游戏')
+    words = []  # 所有单词
+    two_words = []  # 大于或等于两个单词
+    resQuery = news_info.objects.filter(Q(title__icontains=kw)).values_list('title',flat=True)
+    # strs = ["我来到北京清华大学", "我来到中山大学", "我来到北京清华大学"]
+    for str in list(resQuery):
+        seg_list = jieba.lcut(str, cut_all=False) #精确模式
+        words.extend(seg_list)
+    # Counter统计词频
+    res = dict(Counter(words))
+    return HttpResponse(json.dumps(res, ensure_ascii=False), content_type="application/json")
 
 # request完
 

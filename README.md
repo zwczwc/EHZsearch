@@ -8,4 +8,4 @@
 
 ## 部署文档 ##  
 
-[文档](http://www.facesjoy.cn/article/2019/10/24/17.html )
+[文档](http://www.google.com)
